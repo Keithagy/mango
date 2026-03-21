@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mango-debate-poc</title>
+    <style>
+      :root {
+        --paper: #f2eee6;
+        --ink: #1f1a16;
+        --line: #d1c4b1;
+        --codex: #2f6df6;
+        --claude: #d46e20;
+        --mod: #2e8b57;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: Georgia, serif;
+        background:
+          linear-gradient(135deg, #faf6ef 0%, #efe5d5 45%, #ecefe4 100%);
+      }
+      main {
+        width: min(1100px, calc(100vw - 32px));
+        margin: 24px auto;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: rgba(255,255,255,0.42);
+      }
+      h1 { margin: 0; font-size: clamp(38px, 7vw, 64px); }
+      p { margin: 10px 0 0; font-size: 18px; }
+      #status { margin: 18px 0; color: #7a654e; font-style: italic; min-height: 1.2em; }
+      #log {
+        display: grid;
+        gap: 14px;
+        min-height: 420px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255,255,255,0.35);
+      }
+      .entry {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.6);
+      }
+      .entry.codex { border-left: 6px solid var(--codex); }
+      .entry.claude { border-left: 6px solid var(--claude); }
+      .entry.moderator { border-left: 6px solid var(--mod); }
+      .entry.user { border-left: 6px solid #7f6752; }
+      .label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
+      .text { margin-top: 8px; white-space: pre-wrap; font-size: 18px; line-height: 1.5; }
+      form {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 14px;
+      }
+      textarea {
+        min-height: 120px;
+        padding: 18px;
+        border-radius: 24px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.72);
+        color: inherit;
+        font: inherit;
+      }
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 16px 24px;
+        font: inherit;
+        cursor: pointer;
+      }
+      #interrupt { background: rgba(31,26,22,0.08); }
+      button[type="submit"] { background: #1f1a16; color: #fffaf2; }
+      @media (max-width: 760px) {
+        form { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>mango-debate-poc</h1>
+      <p>Watch Codex and Claude argue, then let a moderator synthesize the best answer.</p>
+      <div id="status"></div>
+      <section id="log"></section>
+      <form id="composer">
+        <textarea id="prompt" placeholder="Ask a question worth debating."></textarea>
+        <button id="interrupt" type="button">Interrupt</button>
+        <button type="submit">Debate</button>
+      </form>
+    </main>
+    <script>
+      const log = document.getElementById("log");
+      const prompt = document.getElementById("prompt");
+      const status = document.getElementById("status");
+      const composer = document.getElementById("composer");
+      const interrupt = document.getElementById("interrupt");
+      const active = new Map();
+
+      function ensureEntry(kind, label) {
+        let entry = active.get(kind);
+        if (entry) return entry;
+        entry = document.createElement("div");
+        entry.className = `entry ${kind}`;
+        entry.innerHTML = `<div class="label">${label}</div><div class="text"></div>`;
+        log.appendChild(entry);
+        active.set(kind, entry);
+        return entry;
+      }
+
+      const source = new EventSource("/api/events");
+      source.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        switch (data.kind) {
+          case "input_echo": {
+            const entry = ensureEntry("user", "User");
+            entry.querySelector(".text").textContent = data.text;
+            break;
+          }
+          case "debate_token": {
+            const kind = data.speaker;
+            const label = kind === "codex" ? "Codex" : kind === "claude" ? "Claude" : "Moderator";
+            const entry = ensureEntry(kind, label);
+            entry.querySelector(".text").textContent += data.text;
+            break;
+          }
+          case "status":
+            status.textContent = data.text;
+            break;
+          case "status_clear":
+            status.textContent = "";
+            break;
+          case "error": {
+            const entry = ensureEntry("moderator", "Error");
+            entry.querySelector(".text").textContent += `\n${data.text}`;
+            break;
+          }
+        }
+      };
+
+      composer.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const text = prompt.value.trim();
+        if (!text) return;
+        prompt.value = "";
+        active.clear();
+        log.innerHTML = "";
+        await fetch("/api/message", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+      });
+
+      interrupt.addEventListener("click", async () => {
+        await fetch("/api/interrupt", { method: "POST" });
+      });
+    </script>
+  </body>
+</html>

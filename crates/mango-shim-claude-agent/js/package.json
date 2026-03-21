@@ -1,0 +1,8 @@
+{
+  "name": "mango-shim-claude-agent-js",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.2.79"
+  }
+}
