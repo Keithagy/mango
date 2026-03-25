@@ -126,17 +126,14 @@ where
     }
 }
 
-impl<W, A, C, B> BusWorker<B> for ConcurrentBusWorkers<W, A, C>
+impl<S, W, A, C, B> BusWorker<S, B> for ConcurrentBusWorkers<W, A, C>
 where
+    S: AgentSchema<WorkerId = W>,
     W: Clone + Send + Sync,
-    B: EventBus + Clone + Send + Sync + 'static,
-    B::Subscription: MergeSubscription,
-    A: BusWorker<B> + Worker<WorkerId = W, Subscription = B::Subscription> + Send + Sync + 'static,
-    C: BusWorker<B, Error = A::Error>
-        + Worker<WorkerId = W, Subscription = B::Subscription>
-        + Send
-        + Sync
-        + 'static,
+    B: EventBus<Event = Event<S>, Subscription = Subscription<S>> + Clone + Send + Sync + 'static,
+    Subscription<S>: MergeSubscription,
+    A: BusWorker<S, B> + Send + Sync + 'static,
+    C: BusWorker<S, B, Error = A::Error> + Send + Sync + 'static,
     A::Error: Send + 'static,
     A::Run: Send + 'static,
     C::Run: Send + 'static,

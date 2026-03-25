@@ -7,9 +7,9 @@ use std::{
 };
 
 use mango_core::agent::{
-    AgentIds, AgentRuntime, AgentSchema, AgentWorker, BusWorker, ErrorDescriptor, ErrorEvent,
-    Event, EventBus, EventPayload, EventStream, EventVisibility, Filter, SessionContext,
-    SessionWorker, StreamKey, Subscription,
+    AgentIds, AgentRuntime, AgentSchema, BusWorker, ErrorDescriptor, ErrorEvent, Event, EventBus,
+    EventPayload, EventStream, EventVisibility, Filter, SessionContext, SessionWorker, StreamKey,
+    Subscription,
 };
 pub use mango_runtime_support::{
     BoxFuture, ConcurrentBusWorkers, DefaultAgentIds, EngineId, InferenceRunId, StatusId,
@@ -227,22 +227,12 @@ where
         + Send
         + Sync
         + 'static,
-    Ingress: SessionWorker<B, SessionContext<S>, Error = E>
-        + AgentWorker<S>
-        + Clone
-        + Send
-        + Sync
-        + 'static,
-    Egress: SessionWorker<B, SessionContext<S>, Error = E>
-        + AgentWorker<S>
-        + Clone
-        + Send
-        + Sync
-        + 'static,
-    Control: BusWorker<B, Error = E> + AgentWorker<S> + Clone + Send + Sync + 'static,
-    Inference: BusWorker<B, Error = E> + AgentWorker<S> + Clone + Send + Sync + 'static,
-    Tools: BusWorker<B, Error = E> + AgentWorker<S> + Clone + Send + Sync + 'static,
-    Presentation: BusWorker<B, Error = E> + AgentWorker<S> + Clone + Send + Sync + 'static,
+    Ingress: SessionWorker<S, B, Error = E> + Clone + Send + Sync + 'static,
+    Egress: SessionWorker<S, B, Error = E> + Clone + Send + Sync + 'static,
+    Control: BusWorker<S, B, Error = E> + Clone + Send + Sync + 'static,
+    Inference: BusWorker<S, B, Error = E> + Clone + Send + Sync + 'static,
+    Tools: BusWorker<S, B, Error = E> + Clone + Send + Sync + 'static,
+    Presentation: BusWorker<S, B, Error = E> + Clone + Send + Sync + 'static,
     Ingress::Run: Send,
     Egress::Run: Send,
     Control::Run: Send,

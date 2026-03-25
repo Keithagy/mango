@@ -303,7 +303,7 @@ impl Worker for BrowserIngress {
     }
 }
 
-impl SessionWorker<ChatBus, ChatSession> for BrowserIngress {
+impl SessionWorker<ChatSchema, ChatBus> for BrowserIngress {
     type Error = ChatAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -365,7 +365,7 @@ impl Worker for BrowserEgress {
     }
 }
 
-impl SessionWorker<ChatBus, ChatSession> for BrowserEgress {
+impl SessionWorker<ChatSchema, ChatBus> for BrowserEgress {
     type Error = ChatAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -421,7 +421,7 @@ impl Worker for SimpleChatControl {
     }
 }
 
-impl BusWorker<ChatBus> for SimpleChatControl {
+impl BusWorker<ChatSchema, ChatBus> for SimpleChatControl {
     type Error = ChatAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -720,7 +720,7 @@ where
     Ok(false)
 }
 
-impl<B> BusWorker<ChatBus> for ClaudeChatInference<B>
+impl<B> BusWorker<ChatSchema, ChatBus> for ClaudeChatInference<B>
 where
     B: ClaudeBridgeLike,
 {
@@ -790,7 +790,7 @@ impl Worker for ThinkingStatusWorker {
     }
 }
 
-impl BusWorker<ChatBus> for ThinkingStatusWorker {
+impl BusWorker<ChatSchema, ChatBus> for ThinkingStatusWorker {
     type Error = ChatAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -1003,7 +1003,7 @@ async fn project_chat_event(
     Ok(())
 }
 
-impl BusWorker<ChatBus> for ChatProjector {
+impl BusWorker<ChatSchema, ChatBus> for ChatProjector {
     type Error = ChatAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -1054,7 +1054,7 @@ impl Worker for NoopToolsWorker {
     }
 }
 
-impl BusWorker<ChatBus> for NoopToolsWorker {
+impl BusWorker<ChatSchema, ChatBus> for NoopToolsWorker {
     type Error = ChatAppError;
     type Run = BoxFuture<'static, Self::Error>;
 

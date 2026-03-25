@@ -171,7 +171,7 @@ impl Worker for PromptIngress {
     }
 }
 
-impl SessionWorker<CodeBus, CodeSession> for PromptIngress {
+impl SessionWorker<CodeSchema, CodeBus> for PromptIngress {
     type Error = CodeAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -275,7 +275,7 @@ impl Worker for PromptControl {
     }
 }
 
-impl BusWorker<CodeBus> for PromptControl {
+impl BusWorker<CodeSchema, CodeBus> for PromptControl {
     type Error = CodeAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -524,7 +524,7 @@ where
     Ok(false)
 }
 
-impl<B> BusWorker<CodeBus> for ClaudeCodingInference<B>
+impl<B> BusWorker<CodeSchema, CodeBus> for ClaudeCodingInference<B>
 where
     B: ClaudeBridgeLike,
 {
@@ -597,7 +597,7 @@ impl Worker for ThinkingStatusWorker {
     }
 }
 
-impl BusWorker<CodeBus> for ThinkingStatusWorker {
+impl BusWorker<CodeSchema, CodeBus> for ThinkingStatusWorker {
     type Error = CodeAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -922,7 +922,7 @@ async fn project_code_event(
     Ok(false)
 }
 
-impl BusWorker<CodeBus> for CodingProjector {
+impl BusWorker<CodeSchema, CodeBus> for CodingProjector {
     type Error = CodeAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -975,7 +975,7 @@ impl Worker for TerminalEgress {
     }
 }
 
-impl SessionWorker<CodeBus, CodeSession> for TerminalEgress {
+impl SessionWorker<CodeSchema, CodeBus> for TerminalEgress {
     type Error = CodeAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -1075,7 +1075,7 @@ where
     }
 }
 
-impl<B> BusWorker<CodeBus> for CodingToolsWorker<B>
+impl<B> BusWorker<CodeSchema, CodeBus> for CodingToolsWorker<B>
 where
     B: ClaudeBridgeLike,
 {

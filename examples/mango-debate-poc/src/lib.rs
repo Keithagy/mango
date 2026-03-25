@@ -238,7 +238,7 @@ impl Worker for BrowserIngress {
     }
 }
 
-impl SessionWorker<DebateBus, DebateSession> for BrowserIngress {
+impl SessionWorker<DebateSchema, DebateBus> for BrowserIngress {
     type Error = DebateAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -375,7 +375,7 @@ impl Worker for BrowserEgress {
     }
 }
 
-impl SessionWorker<DebateBus, DebateSession> for BrowserEgress {
+impl SessionWorker<DebateSchema, DebateBus> for BrowserEgress {
     type Error = DebateAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -740,7 +740,7 @@ async fn handle_debate_control_event(
     Ok(())
 }
 
-impl BusWorker<DebateBus> for DebateControl {
+impl BusWorker<DebateSchema, DebateBus> for DebateControl {
     type Error = DebateAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -964,7 +964,7 @@ where
     Ok(false)
 }
 
-impl<B> BusWorker<DebateBus> for ClaudeDebater<B>
+impl<B> BusWorker<DebateSchema, DebateBus> for ClaudeDebater<B>
 where
     B: ClaudeBridgeLike,
 {
@@ -1157,7 +1157,7 @@ where
     Ok(false)
 }
 
-impl<B> BusWorker<DebateBus> for CodexDebater<B>
+impl<B> BusWorker<DebateSchema, DebateBus> for CodexDebater<B>
 where
     B: CodexBridgeLike,
 {
@@ -1307,7 +1307,7 @@ async fn handle_debate_status_event(
     Ok(())
 }
 
-impl BusWorker<DebateBus> for DebateStatusWorker {
+impl BusWorker<DebateSchema, DebateBus> for DebateStatusWorker {
     type Error = DebateAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -1478,7 +1478,7 @@ async fn project_debate_event(
     Ok(())
 }
 
-impl BusWorker<DebateBus> for DebateProjector {
+impl BusWorker<DebateSchema, DebateBus> for DebateProjector {
     type Error = DebateAppError;
     type Run = BoxFuture<'static, Self::Error>;
 
@@ -1526,7 +1526,7 @@ impl Worker for NoopToolsWorker {
     }
 }
 
-impl BusWorker<DebateBus> for NoopToolsWorker {
+impl BusWorker<DebateSchema, DebateBus> for NoopToolsWorker {
     type Error = DebateAppError;
     type Run = BoxFuture<'static, Self::Error>;
 

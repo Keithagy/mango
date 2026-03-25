@@ -8,7 +8,34 @@ use crate::agent::{
     substrate::{Event, EventBus, Subscription},
 };
 
-/// Schema-bound worker alias.
+/// Schema-bound runtime assembly.
+pub trait AgentRuntime {
+    type Error;
+    type Schema: AgentSchema;
+    type Bus: EventBus<
+            Event = Event<Self::Schema>,
+            Subscription = Subscription<Self::Schema>,
+            Error = Self::Error,
+        >;
+    type Ingress: SessionWorker<Self::Schema, Self::Bus, Error = Self::Error>;
+    type Egress: SessionWorker<Self::Schema, Self::Bus, Error = Self::Error>;
+    type Control: BusWorker<Self::Schema, Self::Bus, Error = Self::Error>;
+    type Inference: BusWorker<Self::Schema, Self::Bus, Error = Self::Error>;
+    type Tools: BusWorker<Self::Schema, Self::Bus, Error = Self::Error>;
+    type Presentation: BusWorker<Self::Schema, Self::Bus, Error = Self::Error>;
+    type RunSession: Future<Output = Result<(), Self::Error>>;
+
+    fn bus(&self) -> &Self::Bus;
+    fn ingress(&self) -> &Self::Ingress;
+    fn egress(&self) -> &Self::Egress;
+    fn control(&self) -> &Self::Control;
+    fn inference(&self) -> &Self::Inference;
+    fn tools(&self) -> &Self::Tools;
+    fn presentation(&self) -> &Self::Presentation;
+    fn run_session(&self, session: SessionContext<Self::Schema>) -> Self::RunSession;
+}
+
+/// Worker metadata owned by an agent schema.
 pub trait AgentWorker<S: AgentSchema>:
     Worker<WorkerId = S::WorkerId, Subscription = Subscription<S>>
 {
@@ -30,9 +57,11 @@ pub trait Worker {
     fn subscription(&self) -> Self::Subscription;
 }
 
-pub trait BusWorker<B>: Worker<Subscription = B::Subscription>
+/// Worker that runs against a schema-bound event bus.
+pub trait BusWorker<S, B>: AgentWorker<S>
 where
-    B: EventBus,
+    S: AgentSchema,
+    B: EventBus<Event = Event<S>, Subscription = Subscription<S>>,
 {
     type Error;
     type Run: Future<Output = Result<(), Self::Error>>;
@@ -40,41 +69,14 @@ where
     fn run(self, bus: B) -> Self::Run;
 }
 
-pub trait SessionWorker<B, Session>: Worker<Subscription = B::Subscription>
+/// Worker that runs against a schema-bound event bus with session input.
+pub trait SessionWorker<S, B>: AgentWorker<S>
 where
-    B: EventBus,
+    S: AgentSchema,
+    B: EventBus<Event = Event<S>, Subscription = Subscription<S>>,
 {
     type Error;
     type Run: Future<Output = Result<(), Self::Error>>;
 
-    fn run(self, bus: B, session: Session) -> Self::Run;
-}
-
-/// Schema-bound runtime assembly.
-pub trait AgentRuntime {
-    type Error;
-    type Schema: AgentSchema;
-    type Bus: EventBus<
-            Event = Event<Self::Schema>,
-            Subscription = Subscription<Self::Schema>,
-            Error = Self::Error,
-        >;
-    type Ingress: SessionWorker<Self::Bus, SessionContext<Self::Schema>, Error = Self::Error>
-        + AgentWorker<Self::Schema>;
-    type Egress: SessionWorker<Self::Bus, SessionContext<Self::Schema>, Error = Self::Error>
-        + AgentWorker<Self::Schema>;
-    type Control: BusWorker<Self::Bus, Error = Self::Error> + AgentWorker<Self::Schema>;
-    type Inference: BusWorker<Self::Bus, Error = Self::Error> + AgentWorker<Self::Schema>;
-    type Tools: BusWorker<Self::Bus, Error = Self::Error> + AgentWorker<Self::Schema>;
-    type Presentation: BusWorker<Self::Bus, Error = Self::Error> + AgentWorker<Self::Schema>;
-    type RunSession: Future<Output = Result<(), Self::Error>>;
-
-    fn bus(&self) -> &Self::Bus;
-    fn ingress(&self) -> &Self::Ingress;
-    fn egress(&self) -> &Self::Egress;
-    fn control(&self) -> &Self::Control;
-    fn inference(&self) -> &Self::Inference;
-    fn tools(&self) -> &Self::Tools;
-    fn presentation(&self) -> &Self::Presentation;
-    fn run_session(&self, session: SessionContext<Self::Schema>) -> Self::RunSession;
+    fn run(self, bus: B, session: SessionContext<S>) -> Self::Run;
 }
