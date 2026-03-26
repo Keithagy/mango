@@ -1,0 +1,65 @@
+#!/bin/sh
+
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+say() {
+    printf '%s\n' "$*" >&2
+}
+
+die() {
+    say "pre-commit: $1"
+    exit 1
+}
+
+tmp_added_lines=$(mktemp "${TMPDIR:-/tmp}/mango-pre-commit-added.XXXXXX")
+trap 'rm -f "$tmp_added_lines"' EXIT HUP INT TERM
+
+git diff --cached --unified=0 --no-color --diff-filter=ACMR -- . \
+    | awk '
+        /^\+\+\+ b\// {
+            file = substr($0, 7)
+            next
+        }
+        file == ".githooks/pre-commit" { next }
+        /^\+\+\+ / { next }
+        /^\+/ { print }
+    ' >"$tmp_added_lines"
+
+if ! git show :Cargo.toml 2>/dev/null | grep -Fqx 'pedantic = "deny"'; then
+    die 'the staged root Cargo.toml must keep `[workspace.lints.clippy] pedantic = "deny"`'
+fi
+
+allow_word='allo''w'
+expect_word='expe''ct'
+flag_allow='-''A'
+long_allow='--a''llow'
+cap_lints='--cap-''lints'
+
+attr_bypass_regex="^\\+.*#\\!?\\[[[:space:]]*(${allow_word}|${expect_word})\\("
+cfg_attr_bypass_regex="^\\+.*cfg_attr\\([^)]*(${allow_word}|${expect_word})\\("
+flag_bypass_regex="^\\+.*(^|[[:space:]])${flag_allow}([[:space:]]|$)"
+long_flag_bypass_regex="^\\+.*${long_allow}([=[:space:]]|$)"
+cap_lints_bypass_regex="^\\+.*${cap_lints}([=[:space:]]|$)"
+
+check_staged_diff_forbidden_pattern() {
+    label=$1
+    pattern=$2
+
+    if matches=$(grep -En "$pattern" "$tmp_added_lines"); then
+        say "pre-commit: staged changes introduce a forbidden lint bypass (${label}):"
+        printf '%s\n' "$matches" >&2
+        exit 1
+    fi
+}
+
+check_staged_diff_forbidden_pattern 'Rust allow/expect attribute' "$attr_bypass_regex"
+check_staged_diff_forbidden_pattern 'cfg_attr allow/expect attribute' "$cfg_attr_bypass_regex"
+check_staged_diff_forbidden_pattern 'compiler/clippy -A flag' "$flag_bypass_regex"
+check_staged_diff_forbidden_pattern 'compiler/clippy --allow flag' "$long_flag_bypass_regex"
+check_staged_diff_forbidden_pattern 'compiler --cap-lints flag' "$cap_lints_bypass_regex"
+
+say 'pre-commit: running `cargo clippy --workspace --all-targets -- -D warnings`'
+cargo clippy --workspace --all-targets -- -D warnings

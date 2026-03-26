@@ -1,0 +1,20 @@
+[package]
+name = "mango-telegram"
+version.workspace = true
+edition.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+async-trait = "0.1"
+mango-core = { path = "../../kernel/core" }
+mango-runtime-support = { path = "../../kernel/runtime-support" }
+reqwest = "0.12"
+teloxide = "0.17"
+thiserror = "2"
+tokio = { version = "1", features = ["rt", "sync", "time"] }
+
+[dev-dependencies]
+mango-shim-inmemory = { path = "../../substrate/inmemory-bus" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }

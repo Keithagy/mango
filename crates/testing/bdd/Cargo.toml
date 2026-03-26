@@ -1,0 +1,16 @@
+[package]
+name = "mango-bdd"
+version.workspace = true
+edition.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mango-core = { path = "../../kernel/core" }
+mango-runtime-support = { path = "../../kernel/runtime-support" }
+tokio = { version = "1", features = ["rt", "sync", "time"] }
+
+[dev-dependencies]
+mango-shim-inmemory = { path = "../../substrate/inmemory-bus" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }

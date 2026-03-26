@@ -1,0 +1,15 @@
+[package]
+name = "mango-shim-inmemory"
+version.workspace = true
+edition.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mango-core = { path = "../../kernel/core" }
+tokio = { version = "1", features = ["sync"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+
+[dev-dependencies]
+mango-runtime-support = { path = "../../kernel/runtime-support" }
