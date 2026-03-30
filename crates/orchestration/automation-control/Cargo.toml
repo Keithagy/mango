@@ -1,0 +1,10 @@
+[package]
+name = "mango-automation-control"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+mango-automations = { path = "../automations" }
+
+[lints]
+workspace = true

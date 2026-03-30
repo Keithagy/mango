@@ -1,0 +1,12 @@
+bot_token_env = "MANGO_TELEGRAM_BOT_TOKEN"
+claude_executable = "claude"
+claude_model = "haiku"
+claude_system_prompt_append = ""
+claude_working_directory = "../.."
+node_executable = "node"
+state_file = "telegram-automations-state.json"
+script_path = "scripts/dice_story.js"
+supervisor_poll_interval_ms = 500
+target_words = 50
+max_llm_attempts = 3
+allowed_usernames = ["username"]

@@ -1,0 +1,26 @@
+[package]
+name = "telegram-automations"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1"
+async-trait = "0.1"
+mango-automation-control = { path = "../../crates/orchestration/automation-control" }
+mango-automation-sdk = { path = "../../crates/kernel/automation-sdk" }
+mango-shim-claude-agent = { path = "../../crates/bridges/claude-agent" }
+mango-telegram = { path = "../../crates/surfaces/telegram" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+time = { version = "0.3", features = ["formatting"] }
+tokio = { version = "1", features = ["macros", "process", "rt-multi-thread", "signal", "sync", "time"] }
+toml = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[dev-dependencies]
+mango-automations-bdd = { path = "../../crates/testing/automations-bdd" }
+tempfile = "3"
+
+[lints]
+workspace = true

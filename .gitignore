@@ -1,3 +1,13 @@
-/target
+target/
 **/node_modules/
-examples/telegram/mango-telegram-demo/telegram-demo.toml
+
+# Example-local runtime config and state.
+# Keep checked-in templates (`*.example.toml`) and manifests (`Cargo.toml`);
+# ignore per-developer configs, env files, and runtime state.
+examples/*/*.toml
+!examples/*/Cargo.toml
+!examples/*/*.example.toml
+examples/*/*.env
+examples/*/.env
+examples/*/.env.*
+examples/*/*-state.json

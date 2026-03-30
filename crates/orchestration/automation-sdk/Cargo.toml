@@ -1,0 +1,13 @@
+[package]
+name = "mango-automation-guest-sdk"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+mango-automation-protocol = { path = "../automation-protocol" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+
+[lints]
+workspace = true

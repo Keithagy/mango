@@ -1,0 +1,10 @@
+[package]
+name = "mango-automation-sim"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+mango-automations = { path = "../../orchestration/automations" }
+
+[lints]
+workspace = true

@@ -1,0 +1,22 @@
+[package]
+name = "telegram-chat"
+version.workspace = true
+edition.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = "1"
+mango-core = { path = "../../crates/kernel/core" }
+mango-bdd = { path = "../../crates/testing/bdd" }
+example-support = { path = "../example-support" }
+mango-shim-claude-agent = { path = "../../crates/bridges/claude-agent" }
+mango-telegram = { path = "../../crates/surfaces/telegram" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }
+toml = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }

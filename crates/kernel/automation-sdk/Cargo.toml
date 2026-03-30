@@ -1,0 +1,11 @@
+[package]
+name = "mango-automation-sdk"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+mango-automation-guest-sdk = { path = "../../orchestration/automation-sdk" }
+mango-automation-protocol = { path = "../../orchestration/automation-protocol" }
+
+[lints]
+workspace = true

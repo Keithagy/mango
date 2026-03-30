@@ -1,9 +1,0 @@
-bot_token = "MANGO_TELEGRAM_BOT_TOKEN"
-bot_token_env = "MANGO_TELEGRAM_BOT_TOKEN"
-claude_executable = "claude"
-claude_model = "haiku"
-claude_system_prompt_append = ""
-claude_working_directory = "../../.."
-allowed_usernames = ["username"]
-bus_capacity = 1024
-inbox_capacity = 32
