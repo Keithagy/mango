@@ -12,6 +12,7 @@ mango-shim-claude-agent = { path = "../../crates/bridges/claude-agent" }
 mango-telegram = { path = "../../crates/surfaces/telegram" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+thiserror = "2"
 time = { version = "0.3", features = ["formatting"] }
 tokio = { version = "1", features = ["macros", "process", "rt-multi-thread", "signal", "sync", "time"] }
 toml = "1"

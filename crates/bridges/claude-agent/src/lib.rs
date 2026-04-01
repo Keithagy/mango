@@ -114,6 +114,7 @@ pub enum ClaudeMcpToolset {
 pub struct ClaudeAgentConfig {
     pub cwd: PathBuf,
     pub session_id: String,
+    pub node_executable: String,
     pub claude_executable: String,
     pub model: Option<String>,
     pub tools: Option<ClaudeToolChoice>,
@@ -134,6 +135,7 @@ impl ClaudeAgentConfig {
         Self {
             cwd,
             session_id: session_id.into(),
+            node_executable: "node".to_string(),
             claude_executable: claude_executable.into(),
             model: None,
             tools: None,
@@ -148,6 +150,11 @@ impl ClaudeAgentConfig {
 
     pub fn with_model(mut self, model: impl Into<String>) -> Self {
         self.model = Some(model.into());
+        self
+    }
+
+    pub fn with_node_executable(mut self, node_executable: impl Into<String>) -> Self {
+        self.node_executable = node_executable.into();
         self
     }
 
@@ -392,6 +399,7 @@ fn build_command(config: ClaudeAgentConfig, js_dir: &Path, script: &Path) -> Res
     let ClaudeAgentConfig {
         cwd,
         session_id,
+        node_executable,
         claude_executable,
         model,
         tools,
@@ -402,7 +410,7 @@ fn build_command(config: ClaudeAgentConfig, js_dir: &Path, script: &Path) -> Res
         tool_use_hook_mode,
         mcp_toolset,
     } = config;
-    let mut command = Command::new("node");
+    let mut command = Command::new(node_executable);
     command
         .arg(script)
         .current_dir(js_dir)
@@ -576,4 +584,34 @@ fn spawn_wait_task(mut child: Child, event_tx: broadcast::Sender<ClaudeBridgeEve
 
 fn emit_bridge_error(event_tx: &broadcast::Sender<ClaudeBridgeEvent>, message: String) {
     let _ = event_tx.send(ClaudeBridgeEvent::BridgeError { message });
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{ffi::OsStr, path::Path};
+
+    use super::{ClaudeAgentConfig, build_command};
+
+    #[test]
+    fn build_command_uses_configured_node_runtime() {
+        let command = build_command(
+            ClaudeAgentConfig::new("/tmp".into(), "session-1", "/opt/bin/claude")
+                .with_node_executable("/opt/bin/bun"),
+            Path::new("/sdk/js"),
+            Path::new("/sdk/js/bridge.mjs"),
+        )
+        .expect("command should build");
+        let std_command = command.as_std();
+
+        assert_eq!(std_command.get_program(), OsStr::new("/opt/bin/bun"));
+        assert_eq!(
+            std_command.get_args().collect::<Vec<_>>(),
+            vec![OsStr::new("/sdk/js/bridge.mjs")]
+        );
+
+        let envs = std_command.get_envs().collect::<Vec<_>>();
+        assert!(envs.iter().any(|(key, value)| {
+            *key == OsStr::new("MANGO_CLAUDE_PATH") && *value == Some(OsStr::new("/opt/bin/claude"))
+        }));
+    }
 }

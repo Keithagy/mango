@@ -11,3 +11,5 @@ examples/*/*.env
 examples/*/.env
 examples/*/.env.*
 examples/*/*-state.json
+examples/*/*.session
+examples/*/*.session-*

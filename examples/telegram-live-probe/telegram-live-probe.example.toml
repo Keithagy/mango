@@ -1,0 +1,25 @@
+[demo]
+config_path = "../telegram-automations/telegram-automations.toml"
+
+# For private chats with the bot, chat_id is optional and the probe will derive the
+# bot username from the demo bot token. For groups or supergroups, set chat_id so
+# the probe can target the shared chat instead of the bot's private dialog.
+chat_id = 449237803
+# thread_id is only relevant for forum topics, which the current probe does not support yet.
+
+[probe_user]
+api_id = 123456
+api_hash = "replace-me"
+session_file = "telegram-live-probe.session"
+
+# Only needed the first time the probe logs in to create the session file.
+phone = "+6512345678"
+
+# Optional. If omitted, the probe prompts interactively.
+login_code = ""
+password = ""
+
+[verification]
+schedule_period = "15s"
+reply_timeout_secs = 20
+notification_timeout_secs = 120

@@ -37,6 +37,10 @@ where
         &self.clock
     }
 
+    pub fn advance_time_by(&self, seconds: i64) {
+        self.clock.advance_by(seconds);
+    }
+
     #[must_use]
     pub fn control_plane(
         &self,
@@ -99,6 +103,36 @@ where
     /// wakeups.
     pub async fn reconcile_due(&self) -> Result<usize, AutomationsError> {
         self.control_plane.reconcile_due().await
+    }
+
+    /// Repeatedly reconcile the simulated control plane until no wakeups remain
+    /// due at the current simulated time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when any reconcile cycle fails.
+    pub async fn settle(&self) -> Result<usize, AutomationsError> {
+        let mut total_dispatched = 0;
+        loop {
+            let dispatched = self.control_plane.reconcile_due().await?;
+            total_dispatched += dispatched;
+            if dispatched == 0 {
+                return Ok(total_dispatched);
+            }
+        }
+    }
+
+    /// Advance simulated time and then settle all due wakeups at that time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when settling due wakeups fails.
+    pub async fn advance_time_by_and_settle(
+        &self,
+        seconds: i64,
+    ) -> Result<usize, AutomationsError> {
+        self.advance_time_by(seconds);
+        self.settle().await
     }
 
     /// Inject a user signal into the simulated control plane.

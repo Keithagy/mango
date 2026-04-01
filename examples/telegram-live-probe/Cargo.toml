@@ -1,0 +1,19 @@
+[package]
+name = "telegram-live-probe"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1"
+grammers-client = "0.9"
+grammers-mtsender = "0.9"
+grammers-session = "0.9"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[lints]
+workspace = true

@@ -30,6 +30,29 @@ pub trait AutomationsScenarioWorld {
     }
 }
 
+#[async_trait]
+pub trait TimeDrivenScenarioWorld: AutomationsScenarioWorld {
+    fn advance_time_by(&mut self, seconds: i64);
+
+    /// Drive the simulated automation world until no more work remains due at
+    /// the current simulated time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the simulator cannot settle its pending work.
+    async fn settle_automations(&mut self) -> Result<(), AutomationsError>;
+
+    /// Advance simulated time and settle any work that becomes due.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the simulator cannot settle its pending work.
+    async fn advance_time_by_and_settle(&mut self, seconds: i64) -> Result<(), AutomationsError> {
+        self.advance_time_by(seconds);
+        self.settle_automations().await
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum StepKind {
     Given,
@@ -242,6 +265,30 @@ where
             step: self.step.clone(),
             issue,
         }
+    }
+}
+
+impl<W> ScenarioStep<'_, W>
+where
+    W: TimeDrivenScenarioWorld,
+{
+    /// Advance simulated time and settle pending automation work.
+    ///
+    /// # Errors
+    ///
+    /// Returns a scenario failure when time advancement, settling, or the
+    /// post-step health check fails.
+    pub async fn advance_time_by_and_settle(self, seconds: i64) -> Result<(), ScenarioFailure> {
+        self.scenario.world.advance_time_by(seconds);
+        self.scenario
+            .world
+            .settle_automations()
+            .await
+            .map_err(|error| self.failure(ScenarioIssue::ActionFailed(error.to_string())))?;
+        self.scenario
+            .world
+            .ensure_healthy()
+            .map_err(|error| self.failure(ScenarioIssue::WorldFailed(error.to_string())))
     }
 }
 

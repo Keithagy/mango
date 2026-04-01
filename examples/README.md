@@ -8,7 +8,8 @@ These crates are the public example surface for Mango.
 - `browser-chat` is the smallest browser chat example.
 - `code-agent` shows Mango-owned tool execution around a coding agent.
 - `browser-debate` shows orchestration across multiple concurrent inference workers.
-- `telegram-automations` shows an interactive Telegram bot that manages versioned Wasm automations, runs deterministic JS through host-mediated effects, validates a real LLM refinement step, and delivers the result back over Telegram.
+- `telegram-automations` shows an interactive Telegram bot that manages versioned Wasm automations, runs deterministic JS through host-mediated effects, validates a real LLM refinement step, and delivers the result back over Telegram. Its example-level BDD coverage is wired through the pocket universe.
+- `telegram-live-probe` is the MTProto-backed black-box test client for driving `telegram-automations` from a real user account.
 - `telegram-chat` shows a Telegram surface backed by generic Mango ingress and egress workers.
 
 Suggested reading order:

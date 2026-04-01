@@ -7,8 +7,8 @@ use std::{
 use anyhow::{Context, Result};
 use async_trait::async_trait;
 use mango_automation_control::{
-    ActivationMode, AutomationsControlPlane, AutomationsError, EffectHandler, EffectHandlerOutcome,
-    JsonFileControlPlaneStore, ManualClock, RegistrationRequest, TraceEvent,
+    ActivationMode, AutomationsError, EffectHandler, EffectHandlerOutcome, PocketUniverse,
+    RegistrationRequest, TraceEvent, WasmAutomationRuntime,
 };
 use mango_automation_sdk::{EffectKind, EffectRequest};
 use serde_json::Value;
@@ -71,29 +71,17 @@ async fn main() -> Result<()> {
 
     let workspace_root = workspace_root()?;
     let artifact_path = build_demo_guest(&workspace_root)?;
-    let state_path = workspace_root.join("target/automation-demo-state.json");
-    if state_path.exists() {
-        std::fs::remove_file(&state_path)
-            .with_context(|| format!("failed to remove old state file {}", state_path.display()))?;
-    }
-
     let handler = DemoEffectHandler::default();
-    let clock = ManualClock::new(START_TIME);
-    run_demo_session(&state_path, &artifact_path, &clock, handler.clone()).await?;
+    let universe = PocketUniverse::new(START_TIME, WasmAutomationRuntime::new(), handler.clone());
+    run_demo_session(&universe, &artifact_path).await?;
 
     println!("\nDemo notifications:");
     for notification in handler.notifications() {
         println!("  {notification}");
     }
 
-    let store = JsonFileControlPlaneStore::new(&state_path);
-    let control_plane = AutomationsControlPlane::new(store, handler, clock);
-    let snapshot = control_plane.control_plane_snapshot()?;
-
-    println!(
-        "\nFinal control-plane snapshot stored at {}",
-        state_path.display()
-    );
+    let snapshot = universe.snapshot()?;
+    println!("\nFinal pocket-universe snapshot:");
     for (automation_id, automation) in snapshot.automations {
         println!(
             "automation={} active_revision={:?} last_status={:?} state={}",
@@ -108,7 +96,7 @@ async fn main() -> Result<()> {
     }
 
     println!("\nRecent traces:");
-    for trace in control_plane.traces()?.into_iter().rev().take(8).rev() {
+    for trace in universe.traces()?.into_iter().rev().take(8).rev() {
         println!("  [{}] {:?}", trace.at, trace.event);
     }
 
@@ -116,49 +104,29 @@ async fn main() -> Result<()> {
 }
 
 async fn run_demo_session(
-    state_path: &Path,
+    universe: &PocketUniverse<WasmAutomationRuntime, DemoEffectHandler>,
     artifact_path: &Path,
-    clock: &ManualClock,
-    handler: DemoEffectHandler,
 ) -> Result<()> {
-    {
-        let control_plane = AutomationsControlPlane::new(
-            JsonFileControlPlaneStore::new(state_path),
-            handler.clone(),
-            clock.clone(),
-        );
-        let revision = control_plane.register_revision(&RegistrationRequest {
-            automation_id: "demo".to_string(),
-            artifact_path: artifact_path.to_path_buf(),
-            config: Value::Null,
-        })?;
-        control_plane
-            .activate_revision("demo", revision.revision_id, ActivationMode::ColdStart)
-            .await?;
-        clock.advance_by(120);
-        control_plane.reconcile_due().await?;
-    }
+    let revision = universe.register_revision(&RegistrationRequest {
+        automation_id: "demo".to_string(),
+        artifact_path: artifact_path.to_path_buf(),
+        config: Value::Null,
+    })?;
+    universe
+        .activate_revision("demo", revision.revision_id, ActivationMode::ColdStart)
+        .await?;
+    universe.advance_time_by_and_settle(120).await?;
+    universe.advance_time_by_and_settle(60).await?;
+    universe
+        .submit_user_signal("demo", "confirm_water", Value::Null)
+        .await?;
+    universe.advance_time_by_and_settle(60).await?;
 
-    {
-        let control_plane = AutomationsControlPlane::new(
-            JsonFileControlPlaneStore::new(state_path),
-            handler,
-            clock.clone(),
-        );
-        clock.advance_by(60);
-        control_plane.reconcile_due().await?;
-        control_plane
-            .submit_user_signal("demo", "confirm_water", Value::Null)
-            .await?;
-        clock.advance_by(60);
-        control_plane.reconcile_due().await?;
-
-        let traces = control_plane.traces()?;
-        assert!(traces.iter().any(|trace| matches!(
-            trace.event,
-            TraceEvent::WakeupCancelled { ref wakeup_id, .. } if wakeup_id == "ping"
-        )));
-    }
+    let traces = universe.traces()?;
+    assert!(traces.iter().any(|trace| matches!(
+        trace.event,
+        TraceEvent::WakeupCancelled { ref wakeup_id, .. } if wakeup_id == "ping"
+    )));
 
     Ok(())
 }

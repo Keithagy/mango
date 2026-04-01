@@ -11,7 +11,6 @@ use sdk::{
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-const TELEGRAM_CHANNEL: &str = "telegram";
 const STORY_SYSTEM_PROMPT: &str = "You are the story-writing backend for a Mango Telegram automations example. Return plain text only, no title, no markdown, and obey the exact requested word count.";
 const SCHEDULED_WAKEUP_ID: &str = "scheduled";
 
@@ -245,7 +244,7 @@ fn handle_story_completed(
                     .with_effect(sdk::effect(
                         format!("notify-{}", run.run_id),
                         EffectKind::EmitNotification {
-                            channel: TELEGRAM_CHANNEL.to_string(),
+                            channel: notification_channel(&config.target),
                             title: format!("Dice Story {}", run.run_id),
                             body: story,
                             metadata: json!(config.target),
@@ -364,6 +363,13 @@ fn story_prompt(
 
 fn normalize_story_text(story: &str) -> String {
     story.lines().map(str::trim).collect::<Vec<_>>().join(" ").trim().to_string()
+}
+
+fn notification_channel(target: &TelegramTarget) -> String {
+    match target.thread_id {
+        Some(thread_id) => format!("telegram:{}:{thread_id}", target.chat_id),
+        None => format!("telegram:{}:-", target.chat_id),
+    }
 }
 
 fn deterministic_seed(automation_id: &str, nominal_fire_at: i64, run_id: u64) -> u64 {

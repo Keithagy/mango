@@ -9,7 +9,9 @@ use mango_automations::{
     ActivationMode, AutomationRuntime, AutomationsError, EffectHandler, EffectHandlerOutcome,
     PocketUniverse, RegistrationRequest, TraceEvent, TraceRecord,
 };
-use mango_automations_bdd::{AutomationsScenarioWorld, Scenario, ScenarioFailure};
+use mango_automations_bdd::{
+    AutomationsScenarioWorld, Scenario, ScenarioFailure, TimeDrivenScenarioWorld,
+};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -187,14 +189,6 @@ impl LoopWorld {
         })
     }
 
-    fn advance_time_by(&self, seconds: i64) {
-        self.universe.clock().advance_by(seconds);
-    }
-
-    async fn reconcile_due(&self) -> Result<usize, AutomationsError> {
-        self.universe.reconcile_due().await
-    }
-
     async fn stop(&self) -> Result<(), AutomationsError> {
         self.universe
             .submit_user_signal("loop", "stop", Value::Null)
@@ -213,6 +207,17 @@ impl AutomationsScenarioWorld for LoopWorld {
     }
 }
 
+#[async_trait]
+impl TimeDrivenScenarioWorld for LoopWorld {
+    fn advance_time_by(&mut self, seconds: i64) {
+        self.universe.advance_time_by(seconds);
+    }
+
+    async fn settle_automations(&mut self) -> Result<(), AutomationsError> {
+        self.universe.settle().await.map(|_| ())
+    }
+}
+
 #[tokio::test]
 async fn pocket_universe_replays_control_plane_contracts() -> Result<(), ScenarioFailure> {
     let mut scenario = Scenario::new(
@@ -226,13 +231,7 @@ async fn pocket_universe_replays_control_plane_contracts() -> Result<(), Scenari
 
     scenario
         .when("time advances to the first scheduled wakeup")
-        .perform(|world| {
-            Box::pin(async move {
-                world.advance_time_by(60);
-                world.reconcile_due().await?;
-                Ok(())
-            })
-        })
+        .advance_time_by_and_settle(60)
         .await?;
 
     scenario
@@ -259,9 +258,7 @@ async fn pocket_universe_replays_control_plane_contracts() -> Result<(), Scenari
         .perform(|world| {
             Box::pin(async move {
                 world.stop().await?;
-                world.advance_time_by(60);
-                world.reconcile_due().await?;
-                Ok(())
+                world.advance_time_by_and_settle(60).await
             })
         })
         .await?;
