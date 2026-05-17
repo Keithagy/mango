@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use mango_automation_protocol::{
     AdvanceRequest, AdvanceResponse, AutomationDescriptor, AutomationEvent, Capability, EffectKind,
-    EffectRequest, RegistrationResponse,
+    EffectRequest, EventDisposition, RegistrationResponse,
 };
 use mango_automations::{
     ActivationMode, AutomationRuntime, AutomationsError, EffectHandler, EffectHandlerOutcome,
@@ -81,6 +81,7 @@ impl AutomationRuntime for FixtureRuntime {
                     },
                 )],
                 status: Some("armed".to_string()),
+                disposition: EventDisposition::Handled,
             }),
             AutomationEvent::WakeupFired { .. } if armed => {
                 state["armed"] = json!(true);
@@ -106,6 +107,7 @@ impl AutomationRuntime for FixtureRuntime {
                         ),
                     ],
                     status: Some("pulsing".to_string()),
+                    disposition: EventDisposition::Handled,
                 })
             }
             AutomationEvent::UserSignal { signal, .. } if signal == "stop" => Ok(AdvanceResponse {
@@ -115,11 +117,13 @@ impl AutomationRuntime for FixtureRuntime {
                 }),
                 effects: Vec::new(),
                 status: Some("stopped".to_string()),
+                disposition: EventDisposition::Handled,
             }),
             _ => Ok(AdvanceResponse {
                 state,
                 effects: Vec::new(),
                 status: Some("idle".to_string()),
+                disposition: EventDisposition::Handled,
             }),
         }
     }
@@ -193,6 +197,7 @@ impl LoopWorld {
         self.universe
             .submit_user_signal("loop", "stop", Value::Null)
             .await
+            .map(|_| ())
     }
 
     fn notifications(&self) -> Vec<String> {

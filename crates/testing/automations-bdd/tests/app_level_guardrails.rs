@@ -18,10 +18,9 @@ fn test_modules(source: &str) -> String {
 
 #[test]
 fn telegram_automations_tests_must_flow_through_pocket_universe() {
-    let source = fs::read_to_string(
-        workspace_root().join("examples/telegram-automations/src/lib.rs"),
-    )
-    .expect("telegram-automations source should be readable");
+    let source =
+        fs::read_to_string(workspace_root().join("examples/telegram-automations/src/lib.rs"))
+            .expect("telegram-automations source should be readable");
     let tests = test_modules(&source);
 
     assert!(
@@ -47,9 +46,8 @@ fn telegram_automations_tests_must_flow_through_pocket_universe() {
 
 #[test]
 fn automation_demo_must_use_pocket_universe_as_the_exemplar_surface() {
-    let source =
-        fs::read_to_string(workspace_root().join("examples/automation-demo/src/main.rs"))
-            .expect("automation-demo source should be readable");
+    let source = fs::read_to_string(workspace_root().join("examples/automation-demo/src/main.rs"))
+        .expect("automation-demo source should be readable");
 
     assert!(
         source.contains("PocketUniverse::new("),

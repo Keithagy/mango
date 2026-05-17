@@ -11,9 +11,9 @@ use anyhow::{Context, Result};
 use async_trait::async_trait;
 use mango_automation_control::{
     ActivationMode, AutomationsControlPlane, AutomationsError, EffectHandler, EffectHandlerOutcome,
-    JsonFileControlPlaneStore, ManagedAutomation, PocketUniverse,
-    RegisteredRevision, RegistrationRequest, SupervisorConfig, SupervisorHandle, SystemClock,
-    WasmAutomationRuntime, spawn_supervisor,
+    JsonFileControlPlaneStore, ManagedAutomation, PocketUniverse, RegisteredRevision,
+    RegistrationRequest, SupervisorConfig, SupervisorHandle, SystemClock, WasmAutomationRuntime,
+    spawn_supervisor,
 };
 use mango_automation_sdk::{AutomationEvent, EffectKind, EffectRequest, EffectResult};
 use mango_shim_claude_agent::{ClaudeAgentBridge, ClaudeAgentConfig, ClaudeBridgeEvent};
@@ -103,7 +103,6 @@ impl AutomationPlane for AppControlPlane {
     fn automations(&self) -> Result<BTreeMap<String, ManagedAutomation>, AutomationsError> {
         AutomationsControlPlane::automations(self)
     }
-
 }
 
 #[async_trait]
@@ -135,7 +134,6 @@ impl AutomationPlane for PocketUniverse<WasmAutomationRuntime, TelegramEffectHan
     fn automations(&self) -> Result<BTreeMap<String, ManagedAutomation>, AutomationsError> {
         PocketUniverse::automations(self)
     }
-
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -485,6 +483,7 @@ impl EffectHandler for TelegramEffectHandler {
                     .map_or_else(EffectResult::Err, EffectResult::Ok);
                 Ok(EffectHandlerOutcome {
                     follow_up_events: vec![Self::effect_completed(&effect.effect_id, result, now)],
+                    observations: Vec::new(),
                 })
             }
             EffectKind::RunModel { prompt, system } => {
@@ -501,6 +500,7 @@ impl EffectHandler for TelegramEffectHandler {
                     });
                 Ok(EffectHandlerOutcome {
                     follow_up_events: vec![Self::effect_completed(&effect.effect_id, result, now)],
+                    observations: Vec::new(),
                 })
             }
             other => Err(AutomationsError::Io(format!(
@@ -2003,7 +2003,9 @@ mod bdd_scenarios {
         }
 
         fn automation_count(&self) -> Result<usize, AutomationsError> {
-            self.universe.automations().map(|automations| automations.len())
+            self.universe
+                .automations()
+                .map(|automations| automations.len())
         }
     }
 
@@ -2061,7 +2063,11 @@ mod bdd_scenarios {
                     .map_err(|error| AutomationsError::Io(error.to_string()))?,
             })?;
             self.universe
-                .activate_revision("automation-1", revision.revision_id, ActivationMode::ColdStart)
+                .activate_revision(
+                    "automation-1",
+                    revision.revision_id,
+                    ActivationMode::ColdStart,
+                )
                 .await?;
             Ok(revision.revision_id)
         }
@@ -2181,7 +2187,9 @@ mod bdd_scenarios {
             .await?;
 
         scenario
-            .then("the run requests the configured command runtime and completes with a notification")
+            .then(
+                "the run requests the configured command runtime and completes with a notification",
+            )
             .expect_eventually(
                 "a notification effect for run 1",
                 Duration::from_millis(50),

@@ -1,0 +1,5 @@
+[verification]
+seed = 7
+random_sessions = 4
+max_turns = 10
+reply_timeout_secs = 20

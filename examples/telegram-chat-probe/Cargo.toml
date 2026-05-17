@@ -1,0 +1,18 @@
+[package]
+name = "telegram-chat-probe"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1"
+mango-telegram = { path = "../../crates/surfaces/telegram" }
+rand = { version = "0.8", features = ["std_rng"] }
+serde = { version = "1", features = ["derive"] }
+telegram-chat = { path = "../telegram-chat" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+toml = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }
+
+[lints]
+workspace = true

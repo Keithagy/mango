@@ -2,8 +2,8 @@ use serde_json::Value;
 
 use crate::{
     ActivationMode, AutomationRuntime, AutomationsControlPlane, AutomationsError, EffectHandler,
-    ManagedAutomation, ManualClock, MemoryControlPlaneStore, RegistrationRequest, RevisionId,
-    TraceRecord,
+    EventSubmission, ManagedAutomation, ManualClock, MemoryControlPlaneStore, RegistrationRequest,
+    RevisionId, TraceRecord,
 };
 
 #[derive(Debug, Clone)]
@@ -146,9 +146,26 @@ where
         automation_id: &str,
         signal: impl Into<String>,
         payload: Value,
-    ) -> Result<(), AutomationsError> {
+    ) -> Result<EventSubmission, AutomationsError> {
         self.control_plane
             .submit_user_signal(automation_id, signal, payload)
+            .await
+    }
+
+    /// Inject a normalized runtime trigger into the simulated control plane.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the trigger cannot be delivered to the active
+    /// automation revision.
+    pub async fn submit_trigger(
+        &self,
+        automation_id: &str,
+        trigger: impl Into<String>,
+        payload: Value,
+    ) -> Result<EventSubmission, AutomationsError> {
+        self.control_plane
+            .submit_trigger(automation_id, trigger, payload)
             .await
     }
 

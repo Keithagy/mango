@@ -8,6 +8,8 @@ pub enum AutomationsError {
     Io(String),
     #[error("wasm guest failed: {0}")]
     Guest(String),
+    #[error("provider invocation failed: {0}")]
+    Provider(String),
     #[error("automation `{0}` was not found")]
     AutomationNotFound(String),
     #[error("automation `{automation_id}` has no active revision")]

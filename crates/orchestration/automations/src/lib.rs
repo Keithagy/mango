@@ -7,20 +7,26 @@
 //! - guests communicate only through the protocol types exported by
 //!   `mango-automation-protocol`
 
+pub use mango_automation_protocol::*;
+
+mod bundle_host;
 mod clock;
 mod control_plane;
 mod domain;
 mod error;
 mod guest;
 mod pocket_universe;
+mod providers;
 mod store;
 mod supervisor;
 
+pub use bundle_host::*;
 pub use clock::*;
 pub use control_plane::*;
 pub use domain::*;
 pub use error::*;
 pub use guest::*;
 pub use pocket_universe::*;
+pub use providers::*;
 pub use store::*;
 pub use supervisor::*;

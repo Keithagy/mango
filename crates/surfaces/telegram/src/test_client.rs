@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::sync::{
     Arc,
     atomic::{AtomicI32, Ordering},
@@ -11,7 +12,7 @@ use tokio::{
 
 use crate::{
     TelegramChatId, TelegramClient, TelegramInboundMessage, TelegramMessageId,
-    TelegramOutboundMessage, TelegramThreadId,
+    TelegramOutboundMessage, TelegramPhotoAttachment, TelegramThreadId,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -128,6 +129,37 @@ impl TestTelegramDriver {
                 username: actor.username.clone(),
                 display_name: actor.display_name.clone(),
                 text: text.into(),
+                caption: None,
+                photo: None,
+            })
+            .await
+            .map_err(|_| TestTelegramError::InboxClosed)
+    }
+
+    /// Send a photo message from a scripted actor into the test client inbox.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the test client has already been dropped.
+    pub async fn send_photo(
+        &self,
+        actor: &TestTelegramActor,
+        local_path: impl Into<PathBuf>,
+        caption: Option<String>,
+    ) -> Result<(), TestTelegramError> {
+        let message_id = TelegramMessageId(self.next_message_id.fetch_add(1, Ordering::SeqCst));
+        self.inbound
+            .send(TelegramInboundMessage {
+                chat_id: actor.chat_id,
+                thread_id: actor.thread_id,
+                message_id,
+                username: actor.username.clone(),
+                display_name: actor.display_name.clone(),
+                text: caption.clone().unwrap_or_default(),
+                caption,
+                photo: Some(TelegramPhotoAttachment {
+                    local_path: local_path.into(),
+                }),
             })
             .await
             .map_err(|_| TestTelegramError::InboxClosed)

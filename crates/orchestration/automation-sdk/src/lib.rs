@@ -12,7 +12,7 @@ use thiserror::Error;
 pub use mango_automation_protocol::{
     AUTOMATION_ABI_VERSION, AUTOMATION_SDK_VERSION, AdvanceEnvelope, AdvanceRequest,
     AdvanceResponse, AutomationDescriptor, AutomationEvent, Capability, EffectKind, EffectRequest,
-    EffectResult, RegistrationEnvelope, RegistrationResponse,
+    EffectResult, EventDisposition, RegistrationEnvelope, RegistrationResponse,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -28,6 +28,7 @@ pub struct Decision<S> {
     pub state: S,
     pub effects: Vec<EffectRequest>,
     pub status: Option<String>,
+    pub disposition: EventDisposition,
 }
 
 impl<S> Decision<S> {
@@ -37,6 +38,7 @@ impl<S> Decision<S> {
             state,
             effects: Vec::new(),
             status: None,
+            disposition: EventDisposition::Handled,
         }
     }
 
@@ -49,6 +51,18 @@ impl<S> Decision<S> {
     #[must_use]
     pub fn with_status(mut self, status: impl Into<String>) -> Self {
         self.status = Some(status.into());
+        self
+    }
+
+    #[must_use]
+    pub fn handled(mut self) -> Self {
+        self.disposition = EventDisposition::Handled;
+        self
+    }
+
+    #[must_use]
+    pub fn unhandled(mut self) -> Self {
+        self.disposition = EventDisposition::Unhandled;
         self
     }
 }
@@ -142,6 +156,7 @@ where
         state: serde_json::to_value(decision.state).map_err(GuestSdkError::StateEncode)?,
         effects: decision.effects,
         status: decision.status,
+        disposition: decision.disposition,
     });
     serde_json::to_vec(&response).map_err(GuestSdkError::AdvanceEncode)
 }

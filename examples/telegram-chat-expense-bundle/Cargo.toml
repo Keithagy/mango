@@ -1,0 +1,29 @@
+[package]
+name = "telegram-chat-expense-bundle"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "expense-bundle-provider"
+path = "src/bin/provider.rs"
+
+[dependencies]
+mango-automation-guest-sdk = { path = "../../crates/orchestration/automation-sdk" }
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+toml = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+mango-automations = { path = "../../crates/orchestration/automations" }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[lints]
+workspace = true

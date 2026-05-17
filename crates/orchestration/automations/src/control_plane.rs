@@ -5,7 +5,7 @@ use std::{
 
 use async_trait::async_trait;
 use mango_automation_protocol::{
-    AdvanceRequest, AutomationEvent, Capability, EffectKind, EffectRequest,
+    AdvanceRequest, AutomationEvent, Capability, EffectKind, EffectRequest, EventDisposition,
 };
 use serde_json::Value;
 use sha2::{Digest, Sha256};
@@ -27,6 +27,39 @@ pub struct RegistrationRequest {
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct EffectHandlerOutcome {
     pub follow_up_events: Vec<AutomationEvent>,
+    pub observations: Vec<EffectObservation>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum EffectObservation {
+    Notification {
+        effect_id: String,
+        channel: String,
+        title: String,
+        body: String,
+        metadata: Value,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EventSubmission {
+    pub disposition: EventDisposition,
+    pub observations: Vec<EffectObservation>,
+}
+
+impl Default for EventSubmission {
+    fn default() -> Self {
+        Self {
+            disposition: EventDisposition::Unhandled,
+            observations: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq)]
+struct EffectApplication {
+    follow_up_events: Vec<AutomationEvent>,
+    observations: Vec<EffectObservation>,
 }
 
 #[async_trait]
@@ -211,6 +244,7 @@ where
 
         self.submit_event(automation_id, AutomationEvent::Activated { at: now }, now)
             .await
+            .map(|_| ())
     }
 
     /// Deactivate the currently active revision for an automation while
@@ -283,12 +317,38 @@ where
         automation_id: &str,
         signal: impl Into<String>,
         payload: Value,
-    ) -> Result<(), AutomationsError> {
+    ) -> Result<EventSubmission, AutomationsError> {
         let now = self.clock.now();
         self.submit_event(
             automation_id,
             AutomationEvent::UserSignal {
                 signal: signal.into(),
+                payload,
+                at: now,
+            },
+            now,
+        )
+        .await
+    }
+
+    /// Deliver a normalized runtime trigger into the active automation
+    /// revision.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the automation has no active revision or when the
+    /// guest transition fails.
+    pub async fn submit_trigger(
+        &self,
+        automation_id: &str,
+        trigger: impl Into<String>,
+        payload: Value,
+    ) -> Result<EventSubmission, AutomationsError> {
+        let now = self.clock.now();
+        self.submit_event(
+            automation_id,
+            AutomationEvent::TriggerFired {
+                trigger: trigger.into(),
                 payload,
                 at: now,
             },
@@ -398,20 +458,27 @@ where
         automation_id: &str,
         event: AutomationEvent,
         now: i64,
-    ) -> Result<(), AutomationsError> {
+    ) -> Result<EventSubmission, AutomationsError> {
         let mut pending_events = VecDeque::from([event]);
+        let mut observations = Vec::new();
+        let mut submission = EventSubmission::default();
         while let Some(event) = pending_events.pop_front() {
             let (revision, response) = self.advance_guest(automation_id, event.clone(), now)?;
+            if response.disposition == EventDisposition::Handled {
+                submission.disposition = response.disposition;
+            }
             let follow_up_effects =
                 self.persist_response(automation_id, &revision, event, now, &response)?;
             for effect in &follow_up_effects {
-                let follow_up_events = self
+                let application = self
                     .apply_effect(automation_id, revision.revision_id, effect, now)
                     .await?;
-                pending_events.extend(follow_up_events);
+                observations.extend(application.observations);
+                pending_events.extend(application.follow_up_events);
             }
         }
-        Ok(())
+        submission.observations = observations;
+        Ok(submission)
     }
 
     fn advance_guest(
@@ -553,7 +620,7 @@ where
         revision_id: RevisionId,
         effect: &EffectRequest,
         now: i64,
-    ) -> Result<Vec<AutomationEvent>, AutomationsError> {
+    ) -> Result<EffectApplication, AutomationsError> {
         self.ensure_capability(automation_id, revision_id, &effect.kind)?;
         let outcome = self
             .effect_handler
@@ -572,7 +639,10 @@ where
             );
             Ok(())
         })?;
-        Ok(outcome.follow_up_events)
+        Ok(EffectApplication {
+            follow_up_events: outcome.follow_up_events,
+            observations: outcome.observations,
+        })
     }
 
     fn ensure_capability(
@@ -609,9 +679,11 @@ fn capability_for_effect(kind: &EffectKind) -> Capability {
             Capability::ScheduleWakeups
         }
         EffectKind::EmitNotification { .. } => Capability::EmitNotifications,
+        EffectKind::CallTool { .. } => Capability::CallTools,
         EffectKind::FetchHttp { .. } => Capability::FetchHttp,
         EffectKind::ReadProfile { .. } => Capability::ReadProfile,
         EffectKind::RunCommand { .. } => Capability::RunCommand,
+        EffectKind::RunInference { .. } => Capability::RunInference,
         EffectKind::RunModel { .. } => Capability::RunModel,
     }
 }

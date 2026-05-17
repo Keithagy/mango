@@ -5,5 +5,7 @@ claude_model = "haiku"
 claude_system_prompt_append = ""
 claude_working_directory = "../.."
 allowed_usernames = ["username"]
+automation_bundle_manifests = ["../telegram-chat-expense-bundle/bundle.toml"]
+ocr_executable = "tesseract"
 bus_capacity = 1024
 inbox_capacity = 32

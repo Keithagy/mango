@@ -8,8 +8,8 @@ use mango_core::agent::{
 };
 use mango_telegram::{TelegramChatId, TelegramSurface};
 use telegram_chat::{
-    ChatBus, ChatInput, ChatSchema, ClaudeConversationConfig, ClaudeConversationInference,
-    ConversationControl, UsernameWhitelist, chat_session,
+    ChatBus, ChatInput, ChatInputContent, ChatSchema, ClaudeConversationConfig,
+    ClaudeConversationInference, ConversationControl, UsernameWhitelist, chat_session,
 };
 
 const NOT_MY_CUSTOMER: &str = "sorry, you're not my customer";
@@ -64,8 +64,11 @@ async fn unauthorized_turns_are_rejected_without_panicking() -> Result<(), Scena
                 revision_id: ChatSchema::next_revision_id(),
                 turn_id: ChatSchema::next_turn_id(),
                 input: ChatInput {
-                    text: "hello?".to_string(),
                     username: Some("intruder".to_string()),
+                    display_name: "Intruder".to_string(),
+                    content: ChatInputContent::Text {
+                        text: "hello?".to_string(),
+                    },
                 },
             }),
         )
@@ -107,10 +110,14 @@ async fn unauthorized_turns_are_rejected_without_panicking() -> Result<(), Scena
 fn summarize_chat_event(event: &Event<ChatSchema>) -> String {
     match &event.payload {
         EventPayload::Interaction(InteractionEvent::InputCommitted { input, .. }) => {
-            format!(
-                "input_committed user={:?} text={:?}",
-                input.username, input.text
-            )
+            let text = match &input.content {
+                ChatInputContent::Text { text } => text.clone(),
+                ChatInputContent::Photo {
+                    local_path,
+                    caption,
+                } => format!("photo:{} caption={:?}", local_path.display(), caption),
+            };
+            format!("input_committed user={:?} text={:?}", input.username, text)
         }
         EventPayload::Execution(ExecutionEvent::Control(control)) => format!("control {control:?}"),
         EventPayload::Execution(ExecutionEvent::Inference(InferenceEvent::Started {

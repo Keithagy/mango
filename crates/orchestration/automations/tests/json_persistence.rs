@@ -3,7 +3,7 @@ use std::{path::Path, sync::Arc};
 use async_trait::async_trait;
 use mango_automation_protocol::{
     AdvanceRequest, AdvanceResponse, AutomationDescriptor, AutomationEvent, Capability, EffectKind,
-    EffectRequest, RegistrationResponse,
+    EffectRequest, EventDisposition, RegistrationResponse,
 };
 use mango_automations::{
     ActivationMode, AutomationRuntime, AutomationsControlPlane, AutomationsError, EffectHandler,
@@ -48,6 +48,7 @@ impl AutomationRuntime for PersistenceRuntime {
                     },
                 )],
                 status: Some("armed".to_string()),
+                disposition: EventDisposition::Handled,
             }),
             AutomationEvent::WakeupFired { wakeup_id, .. } if wakeup_id == "once" => {
                 Ok(AdvanceResponse {
@@ -64,12 +65,14 @@ impl AutomationRuntime for PersistenceRuntime {
                         },
                     )],
                     status: Some("executed".to_string()),
+                    disposition: EventDisposition::Handled,
                 })
             }
             _ => Ok(AdvanceResponse {
                 state: request.state.clone(),
                 effects: Vec::new(),
                 status: Some("idle".to_string()),
+                disposition: EventDisposition::Handled,
             }),
         }
     }

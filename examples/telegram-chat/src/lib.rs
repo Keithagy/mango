@@ -1,4 +1,7 @@
-use std::{collections::HashSet, path::PathBuf, sync::Arc};
+mod automation;
+pub mod testing;
+
+use std::{collections::HashSet, fmt::Write as _, path::PathBuf, sync::Arc};
 
 use anyhow::{Context, Result};
 use example_support::{
@@ -24,9 +27,16 @@ use tokio::{
 };
 use tracing::{error, warn};
 
+pub use automation::{
+    AutomationDispatchOutcome, AutomationTurnDispatcher, BundleAutomationDispatcher,
+    NoopAutomationDispatcher, SharedAutomationDispatcher,
+};
+
 const DEFAULT_SYSTEM_PROMPT: &str = "You are the conversational backend for a Mango Telegram chat example. Reply directly, stay concise unless the user asks for detail, and do not assume any tool access.";
 const NOT_MY_CUSTOMER: &str = "sorry, you're not my customer";
 const BACKEND_UNAVAILABLE: &str = "sorry, I'm having trouble reaching my backend right now";
+const AUTOMATION_UNAVAILABLE: &str =
+    "sorry, I hit a problem while checking your expense automations";
 const CLAUDE_ENGINE_ID: &str = "claude-agent-sdk";
 const WHITELIST_ENGINE_ID: &str = "telegram-whitelist";
 
@@ -45,13 +55,49 @@ pub enum ChatInputKind {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChatInput {
-    pub text: String,
     pub username: Option<String>,
+    pub display_name: String,
+    pub content: ChatInputContent,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ChatInputContent {
+    Text {
+        text: String,
+    },
+    Photo {
+        local_path: PathBuf,
+        caption: Option<String>,
+    },
+}
+
+impl ChatInput {
+    #[must_use]
+    pub fn baseline_prompt(&self) -> String {
+        match &self.content {
+            ChatInputContent::Text { text } => text.clone(),
+            ChatInputContent::Photo {
+                local_path,
+                caption,
+            } => {
+                let mut prompt =
+                    format!("The user sent a photo saved at {}.", local_path.display());
+                if let Some(caption) = caption
+                    && !caption.trim().is_empty()
+                {
+                    let _ = write!(prompt, " Caption: {caption}");
+                }
+                prompt.push_str(" Reply conversationally without assuming tool access.");
+                prompt
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ChatDirective {
     ConversationTurn { prompt: String },
+    AutomationHandled { response: String },
     RejectedByWhitelist { response: String },
 }
 
@@ -107,6 +153,12 @@ impl From<InMemoryEventBusError> for ChatAppError {
 
 impl From<TeloxideTelegramError> for ChatAppError {
     fn from(value: TeloxideTelegramError) -> Self {
+        Self::Telegram(value.to_string())
+    }
+}
+
+impl From<mango_telegram::TestTelegramError> for ChatAppError {
+    fn from(value: mango_telegram::TestTelegramError) -> Self {
         Self::Telegram(value.to_string())
     }
 }
@@ -186,31 +238,57 @@ impl TelegramIngressMapper<ChatSchema> for ChatTelegramInputMapper {
         &self,
         message: &mango_telegram::TelegramInboundMessage,
     ) -> Option<TelegramInputTurn<ChatSchema>> {
+        let content = if let Some(photo) = &message.photo {
+            ChatInputContent::Photo {
+                local_path: photo.local_path.clone(),
+                caption: message.caption.clone(),
+            }
+        } else {
+            ChatInputContent::Text {
+                text: message.text.clone(),
+            }
+        };
         Some(TelegramInputTurn {
             kind: ChatInputKind::Message,
             input: ChatInput {
-                text: message.text.clone(),
                 username: message.username.clone(),
+                display_name: message.display_name.clone(),
+                content,
             },
         })
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ConversationControl {
     worker_id: WorkerId,
     session: ChatSession,
     allowed_usernames: UsernameWhitelist,
+    automation_dispatcher: SharedAutomationDispatcher,
     state: Arc<Mutex<ControlState>>,
 }
 
 impl ConversationControl {
     #[must_use]
     pub fn new(session: ChatSession, allowed_usernames: UsernameWhitelist) -> Self {
+        Self::with_automation(
+            session,
+            allowed_usernames,
+            Arc::new(NoopAutomationDispatcher),
+        )
+    }
+
+    #[must_use]
+    pub fn with_automation(
+        session: ChatSession,
+        allowed_usernames: UsernameWhitelist,
+        automation_dispatcher: SharedAutomationDispatcher,
+    ) -> Self {
         Self {
             worker_id: WorkerId::from("telegram-chat-control"),
             session,
             allowed_usernames,
+            automation_dispatcher,
             state: Arc::new(Mutex::new(ControlState::default())),
         }
     }
@@ -245,7 +323,13 @@ impl BusWorker<ChatSchema, ChatBus> for ConversationControl {
                         input,
                         ..
                     }) => {
-                        let directive = directive_for_input(&self.allowed_usernames, input);
+                        let directive = directive_for_input(
+                            &self.allowed_usernames,
+                            self.automation_dispatcher.as_ref(),
+                            &self.session.surface,
+                            input,
+                        )
+                        .await;
                         let supersedes = if directive.is_conversation_turn() {
                             self.state.lock().await.active_run
                         } else {
@@ -491,11 +575,40 @@ where
     C: TelegramClient + Clone + Send + Sync + 'static,
     ChatAppError: From<C::Error>,
 {
+    spawn_chat_runtime_with_automation(
+        client,
+        surface,
+        inbox,
+        bus_capacity,
+        allowed_usernames,
+        Arc::new(NoopAutomationDispatcher),
+        backend,
+    )
+}
+
+#[must_use]
+pub fn spawn_chat_runtime_with_automation<C>(
+    client: C,
+    surface: TelegramSurface,
+    inbox: TelegramInbox,
+    bus_capacity: usize,
+    allowed_usernames: UsernameWhitelist,
+    automation_dispatcher: SharedAutomationDispatcher,
+    backend: &ClaudeConversationConfig,
+) -> JoinHandle<()>
+where
+    C: TelegramClient + Clone + Send + Sync + 'static,
+    ChatAppError: From<C::Error>,
+{
     let session = chat_session(surface);
     let runtime = ChatRuntime::new(
         ExampleSubstrate::new(
             ChatBus::new(bus_capacity),
-            ConversationControl::new(session.clone(), allowed_usernames),
+            ConversationControl::with_automation(
+                session.clone(),
+                allowed_usernames,
+                automation_dispatcher,
+            ),
         ),
         ExampleSurface::new(
             TelegramIngress::new(
@@ -569,12 +682,30 @@ fn normalize_username(username: &str) -> String {
     username.trim().trim_start_matches('@').to_ascii_lowercase()
 }
 
-fn directive_for_input(allowed_usernames: &UsernameWhitelist, input: ChatInput) -> ChatDirective {
-    if allowed_usernames.contains(input.username.as_deref()) {
-        ChatDirective::ConversationTurn { prompt: input.text }
-    } else {
-        ChatDirective::RejectedByWhitelist {
+async fn directive_for_input(
+    allowed_usernames: &UsernameWhitelist,
+    automation_dispatcher: &dyn AutomationTurnDispatcher,
+    surface: &TelegramSurface,
+    input: ChatInput,
+) -> ChatDirective {
+    if !allowed_usernames.contains(input.username.as_deref()) {
+        return ChatDirective::RejectedByWhitelist {
             response: NOT_MY_CUSTOMER.to_string(),
+        };
+    }
+
+    match automation_dispatcher.dispatch(surface, &input).await {
+        Ok(outcome) if outcome.handled => ChatDirective::AutomationHandled {
+            response: outcome.response.unwrap_or_default(),
+        },
+        Ok(_) => ChatDirective::ConversationTurn {
+            prompt: input.baseline_prompt(),
+        },
+        Err(error) => {
+            error!("automation dispatch failed: {error}");
+            ChatDirective::AutomationHandled {
+                response: AUTOMATION_UNAVAILABLE.to_string(),
+            }
         }
     }
 }
@@ -690,25 +821,17 @@ async fn handle_authorized_turn(
     Ok(())
 }
 
-async fn handle_rejected_by_whitelist(
+async fn handle_immediate_response(
     bus: &ChatBus,
     session: &ChatSession,
     request: RequestedTurn,
+    directive: ChatDirective,
     response: String,
+    engine: &'static str,
 ) -> Result<(), ChatAppError> {
     let run_id = ChatSchema::next_inference_run_id();
 
-    publish_inference_started(
-        bus,
-        session,
-        run_id,
-        request,
-        ChatDirective::RejectedByWhitelist {
-            response: response.clone(),
-        },
-        WHITELIST_ENGINE_ID,
-    )
-    .await?;
+    publish_inference_started(bus, session, run_id, request, directive, engine).await?;
     publish::<ChatSchema, _>(
         bus,
         session_stream::<ChatSchema>(session),
@@ -791,8 +914,31 @@ async fn handle_control_event(
                     handle_authorized_turn(worker, bus, bridge, bridge_events, request, prompt)
                         .await?;
                 }
+                ChatDirective::AutomationHandled { response } => {
+                    handle_immediate_response(
+                        bus,
+                        &worker.session,
+                        request,
+                        ChatDirective::AutomationHandled {
+                            response: response.clone(),
+                        },
+                        response,
+                        "automation-bundle",
+                    )
+                    .await?;
+                }
                 ChatDirective::RejectedByWhitelist { response } => {
-                    handle_rejected_by_whitelist(bus, &worker.session, request, response).await?;
+                    handle_immediate_response(
+                        bus,
+                        &worker.session,
+                        request,
+                        ChatDirective::RejectedByWhitelist {
+                            response: response.clone(),
+                        },
+                        response,
+                        WHITELIST_ENGINE_ID,
+                    )
+                    .await?;
                 }
             }
         }
@@ -1139,9 +1285,11 @@ fn incremental_suffix(previous: &str, next: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::{
-        ChatDirective, ChatInput, NOT_MY_CUSTOMER, UsernameWhitelist, directive_for_input,
-        normalize_username,
+        ChatDirective, ChatInput, ChatInputContent, NOT_MY_CUSTOMER, NoopAutomationDispatcher,
+        UsernameWhitelist, directive_for_input, normalize_username,
     };
+    use mango_telegram::{TelegramChatId, TelegramSurface};
+    use std::sync::Arc;
 
     #[test]
     fn username_whitelist_normalizes_configured_usernames() {
@@ -1152,16 +1300,28 @@ mod tests {
         assert!(whitelist.contains(Some("@KeithIsms")));
     }
 
-    #[test]
-    fn directive_for_input_allows_whitelisted_username() {
+    #[tokio::test]
+    async fn directive_for_input_allows_whitelisted_username() {
         let whitelist = UsernameWhitelist::from_usernames(["keithisms"]);
+        let surface = TelegramSurface {
+            chat_id: TelegramChatId(7),
+            thread_id: None,
+            username: Some("keithisms".to_string()),
+            display_name: "Keith".to_string(),
+        };
         let directive = directive_for_input(
             &whitelist,
+            Arc::new(NoopAutomationDispatcher).as_ref(),
+            &surface,
             ChatInput {
-                text: "hello".to_string(),
                 username: Some("@KeithIsms".to_string()),
+                display_name: "Keith".to_string(),
+                content: ChatInputContent::Text {
+                    text: "hello".to_string(),
+                },
             },
-        );
+        )
+        .await;
 
         assert_eq!(
             directive,
@@ -1171,16 +1331,28 @@ mod tests {
         );
     }
 
-    #[test]
-    fn directive_for_input_rejects_unknown_username() {
+    #[tokio::test]
+    async fn directive_for_input_rejects_unknown_username() {
         let whitelist = UsernameWhitelist::from_usernames(["keithisms"]);
+        let surface = TelegramSurface {
+            chat_id: TelegramChatId(7),
+            thread_id: None,
+            username: Some("keithisms".to_string()),
+            display_name: "Keith".to_string(),
+        };
         let directive = directive_for_input(
             &whitelist,
+            Arc::new(NoopAutomationDispatcher).as_ref(),
+            &surface,
             ChatInput {
-                text: "hello".to_string(),
                 username: Some("someone_else".to_string()),
+                display_name: "Someone Else".to_string(),
+                content: ChatInputContent::Text {
+                    text: "hello".to_string(),
+                },
             },
-        );
+        )
+        .await;
 
         assert_eq!(
             directive,

@@ -713,7 +713,9 @@ fn observed_message(update: &Update, target: &Peer, bot_username: &str) -> Optio
         return None;
     }
 
-    let sender_matches = message.sender_id().is_some_and(|sender_id| sender_id == target.id())
+    let sender_matches = message
+        .sender_id()
+        .is_some_and(|sender_id| sender_id == target.id())
         || sender_username.is_some_and(|username| username.eq_ignore_ascii_case(bot_username));
     if !sender_matches {
         return None;

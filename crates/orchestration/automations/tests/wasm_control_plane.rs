@@ -7,7 +7,7 @@ use std::{
 use async_trait::async_trait;
 use mango_automation_protocol::{
     AdvanceEnvelope, AdvanceResponse, AutomationDescriptor, Capability, EffectKind, EffectRequest,
-    RegistrationEnvelope, RegistrationResponse,
+    EventDisposition, RegistrationEnvelope, RegistrationResponse,
 };
 use mango_automations::{
     ActivationMode, AutomationsControlPlane, AutomationsError, EffectHandler, EffectHandlerOutcome,
@@ -118,6 +118,7 @@ async fn revisions_must_be_registered_before_activation_and_activation_runs_gues
                 },
             )],
             status: Some("armed".to_string()),
+            disposition: EventDisposition::Handled,
         }),
     )?;
 
@@ -197,6 +198,7 @@ async fn wakeups_and_effects_flow_through_control_plane_boundaries()
                 },
             )],
             status: Some("notified".to_string()),
+            disposition: EventDisposition::Handled,
         }),
     )?;
 
@@ -258,6 +260,7 @@ async fn preserve_state_rejects_incompatible_schema_versions()
             state: json!({ "schema": 1, "armed": true }),
             effects: Vec::new(),
             status: Some("v1".to_string()),
+            disposition: EventDisposition::Handled,
         }),
     )?;
     let second = write_static_guest(
@@ -276,6 +279,7 @@ async fn preserve_state_rejects_incompatible_schema_versions()
             state: json!({ "schema": 2 }),
             effects: Vec::new(),
             status: Some("v2".to_string()),
+            disposition: EventDisposition::Handled,
         }),
     )?;
 

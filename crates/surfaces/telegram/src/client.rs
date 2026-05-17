@@ -1,15 +1,22 @@
-use std::{env, time::Duration};
+use std::{
+    env,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
 use async_trait::async_trait;
 use reqwest::Client;
 use teloxide::{
     Bot,
+    net::Download,
     payloads::{GetUpdatesSetters, SendMessageSetters},
     prelude::Requester,
     requests::Request,
     types::{AllowedUpdate, ChatId, Message, MessageId, ReplyParameters, ThreadId, UpdateKind},
 };
 use tokio::{
+    fs,
+    io::BufWriter,
     sync::{Mutex, mpsc},
     time::sleep,
 };
@@ -28,6 +35,11 @@ pub struct TelegramThreadId(pub i32);
 pub struct TelegramMessageId(pub i32);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TelegramPhotoAttachment {
+    pub local_path: PathBuf,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TelegramInboundMessage {
     pub chat_id: TelegramChatId,
     pub thread_id: Option<TelegramThreadId>,
@@ -35,6 +47,8 @@ pub struct TelegramInboundMessage {
     pub username: Option<String>,
     pub display_name: String,
     pub text: String,
+    pub caption: Option<String>,
+    pub photo: Option<TelegramPhotoAttachment>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,6 +136,14 @@ impl TeloxideTelegramClient {
         Self::from_bot(build_bot(normalize_bot_token(token)))
     }
 
+    #[must_use]
+    pub fn new_with_download_root(
+        token: impl Into<String>,
+        download_root: impl AsRef<Path>,
+    ) -> Self {
+        Self::from_bot_with_download_root(build_bot(normalize_bot_token(token)), download_root)
+    }
+
     /// Build a client from a token and validate it against Telegram before
     /// starting the polling loop.
     ///
@@ -142,6 +164,29 @@ impl TeloxideTelegramClient {
         Ok(Self::from_bot(bot))
     }
 
+    /// Build a client from a token, validate it, and normalize photo uploads
+    /// into the supplied download root.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the token is invalid or Telegram rejects the
+    /// initial validation request.
+    pub async fn connect_with_download_root(
+        token: impl Into<String>,
+        download_root: impl AsRef<Path>,
+    ) -> Result<Self, TeloxideTelegramError> {
+        let token = normalize_bot_token(token);
+        validate_bot_token(&token)?;
+
+        let bot = build_bot(token);
+        bot.get_me()
+            .send()
+            .await
+            .map_err(TeloxideTelegramError::Connect)?;
+
+        Ok(Self::from_bot_with_download_root(bot, download_root))
+    }
+
     /// Build a client from a token stored in an environment variable.
     ///
     /// # Errors
@@ -154,8 +199,22 @@ impl TeloxideTelegramClient {
 
     #[must_use]
     pub fn from_bot(bot: Bot) -> Self {
+        Self::from_bot_with_optional_download_root(bot, None)
+    }
+
+    #[must_use]
+    pub fn from_bot_with_download_root(bot: Bot, download_root: impl AsRef<Path>) -> Self {
+        Self::from_bot_with_optional_download_root(bot, Some(download_root.as_ref()))
+    }
+
+    #[must_use]
+    fn from_bot_with_optional_download_root(bot: Bot, download_root: Option<&Path>) -> Self {
         let (tx, rx) = mpsc::channel(128);
-        tokio::spawn(run_polling(bot.clone(), tx));
+        tokio::spawn(run_polling(
+            bot.clone(),
+            tx,
+            download_root.map(Path::to_path_buf),
+        ));
         Self {
             bot,
             inbox: std::sync::Arc::new(Mutex::new(rx)),
@@ -198,6 +257,7 @@ impl TelegramClient for TeloxideTelegramClient {
 async fn run_polling(
     bot: Bot,
     tx: mpsc::Sender<Result<TelegramInboundMessage, TeloxideTelegramError>>,
+    download_root: Option<PathBuf>,
 ) {
     let mut offset = 0_i32;
 
@@ -215,7 +275,8 @@ async fn run_polling(
             Ok(updates) => {
                 for update in updates {
                     offset = next_offset(update.id.0);
-                    if let Some(message) = inbound_message(update.kind)
+                    if let Some(message) =
+                        inbound_message(&bot, update.kind, download_root.as_deref()).await
                         && tx.send(Ok(message)).await.is_err()
                     {
                         return;
@@ -237,15 +298,22 @@ async fn run_polling(
     }
 }
 
-fn inbound_message(kind: UpdateKind) -> Option<TelegramInboundMessage> {
+async fn inbound_message(
+    bot: &Bot,
+    kind: UpdateKind,
+    download_root: Option<&Path>,
+) -> Option<TelegramInboundMessage> {
     match kind {
-        UpdateKind::Message(message) => inbound_from_message(&message),
+        UpdateKind::Message(message) => inbound_from_message(bot, &message, download_root).await,
         _ => None,
     }
 }
 
-fn inbound_from_message(message: &Message) -> Option<TelegramInboundMessage> {
-    let text = message.text()?.to_string();
+async fn inbound_from_message(
+    bot: &Bot,
+    message: &Message,
+    download_root: Option<&Path>,
+) -> Option<TelegramInboundMessage> {
     let username = message.from.as_ref().and_then(|user| user.username.clone());
     let display_name = message
         .from
@@ -253,6 +321,17 @@ fn inbound_from_message(message: &Message) -> Option<TelegramInboundMessage> {
         .map(display_name)
         .or_else(|| username.clone())
         .unwrap_or_else(|| "telegram user".to_string());
+    let caption = message.caption().map(str::to_owned);
+
+    let (text, photo) = if let Some(text) = message.text() {
+        (text.to_string(), None)
+    } else if let Some(sizes) = message.photo() {
+        let root = download_root?;
+        let attachment = download_photo(bot, root, message, sizes).await?;
+        (caption.clone().unwrap_or_default(), Some(attachment))
+    } else {
+        return None;
+    };
 
     Some(TelegramInboundMessage {
         chat_id: TelegramChatId(message.chat.id.0),
@@ -263,6 +342,45 @@ fn inbound_from_message(message: &Message) -> Option<TelegramInboundMessage> {
         username,
         display_name,
         text,
+        caption,
+        photo,
+    })
+}
+
+async fn download_photo(
+    bot: &Bot,
+    download_root: &Path,
+    message: &Message,
+    sizes: &[teloxide::types::PhotoSize],
+) -> Option<TelegramPhotoAttachment> {
+    let size = sizes.iter().max_by_key(|size| {
+        (
+            u64::from(size.width) * u64::from(size.height),
+            u64::from(size.file.size),
+        )
+    })?;
+    let file = bot.get_file(size.file.id.clone()).send().await.ok()?;
+    let extension = Path::new(&file.path)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("jpg");
+    let thread = message
+        .thread_id
+        .map_or_else(|| "root".to_string(), |thread_id| thread_id.0.0.to_string());
+    let directory = download_root
+        .join("telegram")
+        .join(message.chat.id.0.to_string())
+        .join(thread);
+    fs::create_dir_all(&directory).await.ok()?;
+    let destination = directory.join(format!(
+        "message-{}-{}.{}",
+        message.id.0, size.file.unique_id.0, extension
+    ));
+    let file_handle = fs::File::create(&destination).await.ok()?;
+    let mut writer = BufWriter::new(file_handle);
+    bot.download_file(&file.path, &mut writer).await.ok()?;
+    Some(TelegramPhotoAttachment {
+        local_path: destination,
     })
 }
 

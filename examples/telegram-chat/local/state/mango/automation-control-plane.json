@@ -1,0 +1,2883 @@
+{
+  "automations": {
+    "expense_reports/449237803/root": {
+      "automation_id": "expense_reports/449237803/root",
+      "revisions": {
+        "1": {
+          "revision_id": 1,
+          "artifact_path": "/Users/keithang/code/mango/examples/telegram-chat-expense-bundle/../../target/wasm32-unknown-unknown/debug/telegram_chat_expense_bundle.wasm",
+          "artifact_sha256": "61db9d09dc4628ca1215b0d2be164705f07372206bd2bfbf4b81d581379f9b11",
+          "registered_at": 1775057465,
+          "descriptor": {
+            "sdk_version": 1,
+            "automation_name": "expense.reports",
+            "description": "Maintains a markdown expense ledger from Telegram text and receipt photos.",
+            "state_schema_version": 1,
+            "capabilities": [
+              "EmitNotifications",
+              "CallTools",
+              "RunInference"
+            ]
+          },
+          "config": {
+            "bundle_name": "expense_reports",
+            "scope_key": "449237803/root"
+          },
+          "initial_state": {
+            "pending_clarification": null,
+            "pending_trigger": null
+          }
+        }
+      },
+      "active_revision_id": 1,
+      "current_state": {
+        "pending_clarification": null,
+        "pending_route": null,
+        "pending_trigger": null
+      },
+      "scheduled_wakeups": {},
+      "last_status": "fallthrough"
+    }
+  },
+  "traces": [
+    {
+      "at": 1775057465,
+      "event": {
+        "RevisionRegistered": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "artifact_sha256": "61db9d09dc4628ca1215b0d2be164705f07372206bd2bfbf4b81d581379f9b11"
+        }
+      }
+    },
+    {
+      "at": 1775057467,
+      "event": {
+        "RevisionActivated": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "mode": "ColdStart"
+        }
+      }
+    },
+    {
+      "at": 1775057467,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "Activated": {
+              "at": 1775057467
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057467,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "ready",
+            "disposition": "Handled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "hi",
+                "username": "keithisms"
+              },
+              "at": 1775057468
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "hi",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775057468
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "hi",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "hi",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775057468
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057468,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "i miss my cat",
+                "username": "keithisms"
+              },
+              "at": 1775057491
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "i miss my cat",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775057491
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "i miss my cat",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "i miss my cat",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775057491
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057491,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "do you?",
+                "username": "keithisms"
+              },
+              "at": 1775057504
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "do you?",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775057504
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "do you?",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "do you?",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775057504
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057504,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.photo_received",
+              "payload": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-143-AQADSQ9rG4RFaFZ-.jpg",
+                "username": "keithisms"
+              },
+              "at": 1775057559
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-143-AQADSQ9rG4RFaFZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775057559
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-143-AQADSQ9rG4RFaFZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "caption": "had these expenses today",
+                        "display_name": "Keith Ang",
+                        "kind": "photo",
+                        "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-143-AQADSQ9rG4RFaFZ-.jpg",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775057559
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775057559,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "what do you remember",
+                "username": "keithisms"
+              },
+              "at": 1775117192
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "what do you remember",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775117192
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "what do you remember",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "what do you remember",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775117192
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117192,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.photo_received",
+              "payload": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-147-AQADxg5rGw7LcVZ-.jpg",
+                "username": "keithisms"
+              },
+              "at": 1775117222
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-147-AQADxg5rGw7LcVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775117222
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-147-AQADxg5rGw7LcVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "caption": "had these expenses today",
+                        "display_name": "Keith Ang",
+                        "kind": "photo",
+                        "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-147-AQADxg5rGw7LcVZ-.jpg",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775117222,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "what do you remember",
+                "username": "keithisms"
+              },
+              "at": 1775119850
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "what do you remember",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775119850
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "what do you remember",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "what do you remember",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775119850
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119850,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.photo_received",
+              "payload": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                "username": "keithisms"
+              },
+              "at": 1775119881
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775119881
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "caption": "had these expenses today",
+                        "display_name": "Keith Ang",
+                        "kind": "photo",
+                        "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "draft": {
+                    "amount": "140.28",
+                    "currency": "USD",
+                    "merchant": "vY Show less x",
+                    "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                    "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                    "spent_at": null
+                  },
+                  "kind": "create"
+                }
+              },
+              "at": 1775119881
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.mutate",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "draft": {
+                        "amount": "140.28",
+                        "currency": "USD",
+                        "merchant": "vY Show less x",
+                        "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                        "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                        "spent_at": null
+                      },
+                      "kind": "create"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "creating",
+            "disposition": "Handled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.mutate",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.mutate",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.mutate",
+              "result": {
+                "Ok": {
+                  "expense": {
+                    "amount": "140.28",
+                    "created_at": "1775119889",
+                    "currency": "USD",
+                    "id": "expense-1775119889-963",
+                    "merchant": "vY Show less x",
+                    "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                    "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                    "spent_at": null,
+                    "status": "active",
+                    "updated_at": "1775119889"
+                  },
+                  "kind": "mutated",
+                  "message": "Saved expense expense-1775119889-963 for vY Show less x USD 140.28."
+                }
+              },
+              "at": 1775119881
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_trigger": null
+            },
+            "effects": [
+              {
+                "effect_id": "notify-1",
+                "kind": {
+                  "EmitNotification": {
+                    "channel": "telegram.chat",
+                    "title": "Expense reports",
+                    "body": "Saved expense expense-1775119889-963 for vY Show less x USD 140.28.",
+                    "metadata": null
+                  }
+                }
+              }
+            ],
+            "status": "mutated",
+            "disposition": "Handled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "notify-1",
+          "effect_kind": "emit_notification"
+        }
+      }
+    },
+    {
+      "at": 1775119881,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "notify-1",
+          "follow_up_events": 0
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "test",
+                "username": "keithisms"
+              },
+              "at": 1775636198
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "test",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [
+                    {
+                      "amount": "140.28",
+                      "created_at": "1775119889",
+                      "currency": "USD",
+                      "id": "expense-1775119889-963",
+                      "merchant": "vY Show less x",
+                      "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                      "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                      "spent_at": null,
+                      "status": "active",
+                      "updated_at": "1775119889"
+                    }
+                  ],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775636198
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "test",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [
+                        {
+                          "amount": "140.28",
+                          "created_at": "1775119889",
+                          "currency": "USD",
+                          "id": "expense-1775119889-963",
+                          "merchant": "vY Show less x",
+                          "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                          "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                          "spent_at": null,
+                          "status": "active",
+                          "updated_at": "1775119889"
+                        }
+                      ],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "test",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775636198
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636198,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.photo_received",
+              "payload": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                "username": "keithisms"
+              },
+              "at": 1775636218
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [
+                    {
+                      "amount": "140.28",
+                      "created_at": "1775119889",
+                      "currency": "USD",
+                      "id": "expense-1775119889-963",
+                      "merchant": "vY Show less x",
+                      "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                      "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                      "spent_at": null,
+                      "status": "active",
+                      "updated_at": "1775119889"
+                    }
+                  ],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775636218
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": {
+                "expenses": [
+                  {
+                    "amount": "140.28",
+                    "created_at": "1775119889",
+                    "currency": "USD",
+                    "id": "expense-1775119889-963",
+                    "merchant": "vY Show less x",
+                    "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                    "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                    "spent_at": null,
+                    "status": "active",
+                    "updated_at": "1775119889"
+                  }
+                ],
+                "trigger": {
+                  "caption": "had these expenses today",
+                  "display_name": "Keith Ang",
+                  "kind": "photo",
+                  "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                  "username": "keithisms"
+                }
+              },
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-receipt.extract",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.receipt_extractor",
+                    "input": {
+                      "caption": "had these expenses today",
+                      "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "extracting_receipt",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-receipt.extract",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-receipt.extract",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-receipt.extract",
+              "result": {
+                "Ok": {
+                  "amount": null,
+                  "caption": "had these expenses today",
+                  "currency": "SGD",
+                  "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                  "looks_like_expense": false,
+                  "merchant": "had these expenses today",
+                  "ocr_text": "",
+                  "spent_at": null
+                }
+              },
+              "at": 1775636218
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "caption": "had these expenses today",
+                "display_name": "Keith Ang",
+                "kind": "photo",
+                "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [
+                        {
+                          "amount": "140.28",
+                          "created_at": "1775119889",
+                          "currency": "USD",
+                          "id": "expense-1775119889-963",
+                          "merchant": "vY Show less x",
+                          "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                          "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                          "spent_at": null,
+                          "status": "active",
+                          "updated_at": "1775119889"
+                        }
+                      ],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "extraction": {
+                          "amount": null,
+                          "caption": "had these expenses today",
+                          "currency": "SGD",
+                          "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                          "looks_like_expense": false,
+                          "merchant": "had these expenses today",
+                          "ocr_text": "",
+                          "spent_at": null
+                        },
+                        "kind": "photo",
+                        "photo": {
+                          "caption": "had these expenses today",
+                          "display_name": "Keith Ang",
+                          "local_path": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-155-AQADNQ5rGxjvsVZ-.jpg",
+                          "username": "keithisms"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775636218
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636218,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "what does your prompt say about handling expenses like these?",
+                "username": "keithisms"
+              },
+              "at": 1775636254
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "what does your prompt say about handling expenses like these?",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [
+                    {
+                      "amount": "140.28",
+                      "created_at": "1775119889",
+                      "currency": "USD",
+                      "id": "expense-1775119889-963",
+                      "merchant": "vY Show less x",
+                      "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                      "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                      "spent_at": null,
+                      "status": "active",
+                      "updated_at": "1775119889"
+                    }
+                  ],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775636254
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "what does your prompt say about handling expenses like these?",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [
+                        {
+                          "amount": "140.28",
+                          "created_at": "1775119889",
+                          "currency": "USD",
+                          "id": "expense-1775119889-963",
+                          "merchant": "vY Show less x",
+                          "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                          "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                          "spent_at": null,
+                          "status": "active",
+                          "updated_at": "1775119889"
+                        }
+                      ],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "what does your prompt say about handling expenses like these?",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "clear_clarification": false,
+                  "kind": "reply",
+                  "message": "Current active expenses:\n- expense-1775119889-963: vY Show less x USD 140.28"
+                }
+              },
+              "at": 1775636254
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": null
+            },
+            "effects": [
+              {
+                "effect_id": "notify-1",
+                "kind": {
+                  "EmitNotification": {
+                    "channel": "telegram.chat",
+                    "title": "Expense reports",
+                    "body": "Current active expenses:\n- expense-1775119889-963: vY Show less x USD 140.28",
+                    "metadata": null
+                  }
+                }
+              }
+            ],
+            "status": "replied",
+            "disposition": "Handled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "notify-1",
+          "effect_kind": "emit_notification"
+        }
+      }
+    },
+    {
+      "at": 1775636254,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "notify-1",
+          "follow_up_events": 0
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "TriggerFired": {
+              "trigger": "telegram.text_received",
+              "payload": {
+                "display_name": "Keith Ang",
+                "text": "how did you know that?",
+                "username": "keithisms"
+              },
+              "at": 1775636268
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "how did you know that?",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-store.list",
+                "kind": {
+                  "CallTool": {
+                    "slug": "expense.markdown_store",
+                    "input": {
+                      "kind": "list_active"
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "loading_context",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "effect_kind": "call_tool"
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-store.list",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-store.list",
+              "result": {
+                "Ok": {
+                  "expenses": [
+                    {
+                      "amount": "140.28",
+                      "created_at": "1775119889",
+                      "currency": "USD",
+                      "id": "expense-1775119889-963",
+                      "merchant": "vY Show less x",
+                      "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                      "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                      "spent_at": null,
+                      "status": "active",
+                      "updated_at": "1775119889"
+                    }
+                  ],
+                  "kind": "expenses"
+                }
+              },
+              "at": 1775636268
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": {
+                "display_name": "Keith Ang",
+                "kind": "text",
+                "text": "how did you know that?",
+                "username": "keithisms"
+              }
+            },
+            "effects": [
+              {
+                "effect_id": "expense-router.route",
+                "kind": {
+                  "RunInference": {
+                    "capability": "expense.router",
+                    "input": {
+                      "expenses": [
+                        {
+                          "amount": "140.28",
+                          "created_at": "1775119889",
+                          "currency": "USD",
+                          "id": "expense-1775119889-963",
+                          "merchant": "vY Show less x",
+                          "notes": "vY Show less x\n\nHSBC Bank Singapore Limited\nNTUC FairPrice App Paymen\n$6.14\n\nHSBC Bank Singapore Limited\nKahve, Singapore, SG\n$13.50\n\nHSBC Bank Singapore Limi...\n\n2h ago\n\nYesterday, 9:37PM\n\nOpen Kitchen Amoy, Singapore, SG\n\n$140.28\n\nHSBC Bank Singapore Limi...\nTea Time, Singapore, SG\n$48.18\n\nHSBC Bank Singapore Limi...\nSMRT, Singapore, SG\n$4.73\n\nHSBC Bank Singapore Lim...\nPhoenix, Singapore, SG\n$10.60\n\nYesterday, 7:57PM\n\nYesterday, 6:09 AM\n\nYesterday, 12:08AM\n\n4",
+                          "source_image": "/Users/keithang/code/mango/examples/telegram-chat/./local/state/mango/telegram/449237803/root/message-151-AQAD2g5rGw7LcVZ-.jpg",
+                          "spent_at": null,
+                          "status": "active",
+                          "updated_at": "1775119889"
+                        }
+                      ],
+                      "pending_clarification": null,
+                      "trigger": {
+                        "display_name": "Keith Ang",
+                        "kind": "text",
+                        "text": "how did you know that?",
+                        "username": "keithisms"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "status": "routing",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EffectRequested": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "effect_kind": "run_inference"
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EffectHandled": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "effect_id": "expense-router.route",
+          "follow_up_events": 1
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "EventSubmitted": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "event": {
+            "EffectCompleted": {
+              "effect_id": "expense-router.route",
+              "result": {
+                "Ok": {
+                  "kind": "unhandled"
+                }
+              },
+              "at": 1775636268
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": 1775636268,
+      "event": {
+        "StateAdvanced": {
+          "automation_id": "expense_reports/449237803/root",
+          "revision_id": 1,
+          "response": {
+            "state": {
+              "pending_clarification": null,
+              "pending_route": null,
+              "pending_trigger": null
+            },
+            "effects": [],
+            "status": "fallthrough",
+            "disposition": "Unhandled"
+          }
+        }
+      }
+    }
+  ],
+  "next_revision_id": 1
+}

@@ -41,9 +41,11 @@ impl AutomationDescriptor {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Capability {
     EmitNotifications,
+    CallTools,
     FetchHttp,
     ReadProfile,
     RunCommand,
+    RunInference,
     RunModel,
     ScheduleWakeups,
 }
@@ -75,6 +77,7 @@ pub struct AdvanceResponse {
     pub state: Value,
     pub effects: Vec<EffectRequest>,
     pub status: Option<String>,
+    pub disposition: EventDisposition,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -86,6 +89,11 @@ pub enum AdvanceEnvelope {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum AutomationEvent {
     Activated {
+        at: i64,
+    },
+    TriggerFired {
+        trigger: String,
+        payload: Value,
         at: i64,
     },
     WakeupFired {
@@ -102,6 +110,17 @@ pub enum AutomationEvent {
         result: EffectResult,
         at: i64,
     },
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum EventDisposition {
+    Unhandled,
+    // TODO: This is the current single-automation flow-control contract.
+    // Revisit it when multi-automation scatter-gather and concurrent baseline
+    // chat fan-out are first-class so hosts can merge multiple outcomes
+    // without overloading a binary handled/unhandled flag.
+    #[default]
+    Handled,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -141,9 +160,17 @@ pub enum EffectKind {
     ReadProfile {
         keys: Vec<String>,
     },
+    CallTool {
+        slug: String,
+        input: Value,
+    },
     RunCommand {
         program: String,
         args: Vec<String>,
+    },
+    RunInference {
+        capability: String,
+        input: Value,
     },
     RunModel {
         prompt: String,

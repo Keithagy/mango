@@ -141,9 +141,11 @@ pub fn effect_kind_label(kind: &EffectKind) -> &'static str {
         EffectKind::ScheduleWakeup { .. } => "schedule_wakeup",
         EffectKind::CancelWakeup { .. } => "cancel_wakeup",
         EffectKind::EmitNotification { .. } => "emit_notification",
+        EffectKind::CallTool { .. } => "call_tool",
         EffectKind::FetchHttp { .. } => "fetch_http",
         EffectKind::ReadProfile { .. } => "read_profile",
         EffectKind::RunCommand { .. } => "run_command",
+        EffectKind::RunInference { .. } => "run_inference",
         EffectKind::RunModel { .. } => "run_model",
     }
 }
